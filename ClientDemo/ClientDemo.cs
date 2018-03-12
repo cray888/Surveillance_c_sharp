@@ -390,8 +390,9 @@ namespace ClientDemo
         }
 
         public void ReConnect(object source, System.Timers.ElapsedEventArgs e)
-        {                
-        	foreach( DEV_INFO devinfo in dictDiscontDev.Values )
+        {
+            Dictionary<int, DEV_INFO> dictDiscontDevCopy = new Dictionary<int, DEV_INFO>(dictDiscontDev);
+            foreach ( DEV_INFO devinfo in dictDiscontDevCopy.Values )
             {
                 H264_DVR_DEVICEINFO OutDev = new H264_DVR_DEVICEINFO();
                 int nError = 0;
@@ -434,10 +435,19 @@ namespace ClientDemo
                         DEV_INFO dev = (DEV_INFO)node.Tag;
                         if (dev.lLoginID == devinfo.lLoginID)
                         {
-                            node.Text = devAdd.szDevName;
-                            node.Tag = devAdd;
-                            node.Name = "Device";
-
+                            if (this.InvokeRequired)
+                                this.BeginInvoke((MethodInvoker)(() =>
+                                {
+                                    node.Text = devAdd.szDevName;
+                                    node.Tag = devAdd;
+                                    node.Name = "Device";
+                                }));
+                            else
+                            {
+                                node.Text = devAdd.szDevName;
+                                node.Tag = devAdd;
+                                node.Name = "Device";
+                            }
                             foreach (TreeNode channelnode in node.Nodes)
                             {
                                 CHANNEL_INFO chInfo = (CHANNEL_INFO)channelnode.Tag;

@@ -11,7 +11,6 @@ using System.Drawing.Imaging;
 
 namespace ClientDemo
 {
-
     public partial class VideoForm : UserControl
     {
         public bool m_bSaveImageStart;
@@ -26,10 +25,19 @@ namespace ClientDemo
 	    public int m_iChannel; //play channel
         public int m_iTalkhandle;
 
-	    public void SetWndIndex(int nIndex)
+        public VideoForm()
+        {
+            InitializeComponent();
+            m_tTimer.Elapsed += M_tTimer_Elapsed;
+            m_tTimer.AutoReset = true;
+            m_tTimer.Start();
+        }
+
+        public void SetWndIndex(int nIndex)
 	    {
 		    m_nIndex = nIndex;
 	    }
+
 	    public int ConnectRealPlay( ref DEV_INFO pDev, int nChannel)
         {
             if(m_iPlayhandle != -1)
@@ -37,7 +45,7 @@ namespace ClientDemo
 
                 if (0 != XMSDK.H264_DVR_StopRealPlay(m_iPlayhandle, (uint)this.panel1.Handle))
 		        {
-			        //TRACE("H264_DVR_StopRealPlay fail m_iPlayhandle = %d", m_iPlayhandle);
+
 		        }
 		        if(m_bSound)
 		        {
@@ -50,7 +58,10 @@ namespace ClientDemo
 	        playstru.nChannel = nChannel;
 	        playstru.nStream = 1;
 	        playstru.nMode = 0;
-	        playstru.hWnd=this.panel1.Handle;
+	        //playstru.hWnd=this.panel1.Handle;
+            if (this.InvokeRequired)
+                this.BeginInvoke((MethodInvoker)(() => playstru.hWnd = this.panel1.Handle));
+            else playstru.hWnd = this.panel1.Handle;
             m_iPlayhandle = XMSDK.H264_DVR_RealPlay(pDev.lLoginID, ref playstru);	
 	        if(m_iPlayhandle <= 0 )
 	        {
@@ -81,6 +92,7 @@ namespace ClientDemo
             uint nRegionNum = 0;
             XMSDK.H264_DVR_LocalGetColor(m_iPlayhandle, nRegionNum, out nBright, out nContrast, out nSaturation, out nHue);
         }
+
 	    public void SetColor(int nBright, int nContrast, int nSaturation, int nHue)
         {
             XMSDK.H264_DVR_LocalSetColor(m_iPlayhandle, 0, nBright, nContrast, nSaturation, nHue);
@@ -90,6 +102,7 @@ namespace ClientDemo
 	    {
 		    return m_iPlayhandle;
 	    }
+
 	    public bool OnOpenSound()
         {
             if (XMSDK.H264_DVR_OpenSound(m_iPlayhandle))
@@ -99,6 +112,7 @@ namespace ClientDemo
             }
             return false;
         }
+
         public bool OnCloseSound()
         {
             if (XMSDK.H264_DVR_CloseSound(m_iPlayhandle))
@@ -108,6 +122,7 @@ namespace ClientDemo
             }
             return false;
         }
+
 	    public bool SaveRecord()
         {
             if ( m_iPlayhandle <= 0 )
@@ -126,7 +141,6 @@ namespace ClientDemo
                                                         time.Second);
 	        if ( m_bRecord )
 	        {
-
                 if (XMSDK.H264_DVR_StopLocalRecord(m_iPlayhandle))
 		        {
 			        m_bRecord = false;
@@ -151,7 +165,6 @@ namespace ClientDemo
                     {
                         dir.Create();
                     }
-
 		        }
 
                 if (XMSDK.H264_DVR_StartLocalRecord(m_iPlayhandle, cFilename, (int)MEDIA_FILE_TYPE.MEDIA_FILE_NONE))
@@ -164,7 +177,6 @@ namespace ClientDemo
 			        MessageBox.Show(@"start record fail.");
 		        }
 	        }
-
 	        return true;
         }
 
@@ -172,6 +184,7 @@ namespace ClientDemo
         {
             return m_lLogin;
         }
+
         public void OnDisconnct()
         {
             if (m_iPlayhandle > 0)
@@ -187,16 +200,13 @@ namespace ClientDemo
             m_lLogin = -1;
         }
 
-
         public void drawOSD(int nPort, IntPtr hDc)
         {
-            if (m_strInfoFrame[nPort] !="")
+            if (m_strInfoFrame[nPort] != "")
             {    
-                //改变字体颜色
                 FontFamily fontfamily = new FontFamily(@"Arial");
                 Font newFont = new Font(fontfamily, 16,FontStyle.Bold);
-                SolidBrush brush =  new SolidBrush(Color.Red);
-       
+                SolidBrush brush =  new SolidBrush(Color.Red);       
 
                 Graphics graphic = Graphics.FromHdc(hDc);
                 graphic.DrawString("TEST", newFont,brush,10,10);            
@@ -210,10 +220,9 @@ namespace ClientDemo
             return XMSDK.H264_DVR_SetDevConfig(m_lLogin, (uint)SDK_CONFIG_TYPE.E_SDK_VIDEOCOLOR, m_iChannel, ptr, (uint)Marshal.SizeOf(pVideoColor), 3000);
          
         }
+
         static void videoInfoFramCallback(int nPort, int nType, string pBuf,int nSize, IntPtr nUser)
         {
-            //收到信息帧, 0x03 代表GPRS信息
-      
             if (nType == 0x03)
             {
                 VideoForm form = new VideoForm();
@@ -223,15 +232,6 @@ namespace ClientDemo
         }
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 100)]
 	    public string[] m_strInfoFrame;
-
-
-        public VideoForm()
-        {
-            InitializeComponent();
-            m_tTimer.Elapsed += M_tTimer_Elapsed;
-            m_tTimer.AutoReset = true;
-            m_tTimer.Start();
-        }
 
         private void M_tTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -257,7 +257,7 @@ namespace ClientDemo
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if ( -1 != m_nIndex)
+            if (-1 != m_nIndex)
             {
                 XMSDK.H264_DVR_StopRealPlay(m_iPlayhandle,(uint)this.panel1.Handle);
                 ClientDemo clientdemo = (ClientDemo)this.Parent;
@@ -279,14 +279,10 @@ namespace ClientDemo
                                     break;
                                 }
                             }
-
                         }
-                    }
-                   
+                    }                   
                 }
-
-            }
-           
+            }           
         }
 
         private void catchPictureToolStripMenuItem_Click(object sender, EventArgs e)
@@ -312,22 +308,31 @@ namespace ClientDemo
                                     int h = System.DateTime.Now.Hour;
                                     int min = System.DateTime.Now.Minute;
                                     int s = System.DateTime.Now.Second;
-                                    strPath = String.Format("Z:\\Pictures\\bmp\\{0}_{1}.bmp", node.Text, chInfo.nChannelNo + 1);
-                                    
-                                    bool bCatch = XMSDK.H264_DVR_LocalCatchPic(m_iPlayhandle, strPath);
+                                    strPath = String.Format(@"Z:\Pictures\bmp\{0}.bmp", m_nIndex + 1);
+
+                                    bool bCatch = false;
+
+                                    try
+                                    {
+                                        bCatch = XMSDK.H264_DVR_LocalCatchPic(m_iPlayhandle, strPath);
+                                    }
+                                    catch
+                                    {
+
+                                    }
 
                                     if ( bCatch )
                                     {
                                         //System.Diagnostics.Process.Start(strPath);
                                         try
                                         {
-                                            /*Bitmap bmp1 = new Bitmap(strPath);
-                                            bmp1.Save(String.Format("Z:\\Pictures\\jpeg\\{0}_{1}.jpg", node.Text, chInfo.nChannelNo + 1), ImageFormat.Jpeg);*/
-                                            Bitmap bmp1 = new Bitmap(strPath);
+                                            Bitmap bitmap = new Bitmap(strPath);
                                             var stream = new MemoryStream();
-                                            bmp1.Save(stream, ImageFormat.Jpeg);
-                                            bmp1.Dispose();
-                                            File.WriteAllBytes(String.Format("Z:\\Pictures\\jpeg\\{0}_{1}.jpg", node.Text, chInfo.nChannelNo + 1), stream.GetBuffer());
+                                            bitmap.Save(stream, ImageFormat.Jpeg);
+                                            bitmap.Dispose();
+                                            DirectoryInfo dir = new DirectoryInfo(@"Z:\Pictures\jpeg\");
+                                            if (!dir.Exists) dir.Create();
+                                            File.WriteAllBytes(String.Format(@"Z:\Pictures\jpeg\{0}.jpg", m_nIndex + 1), stream.GetBuffer());
                                         }
                                         catch (Exception ex)
                                         {
@@ -341,7 +346,6 @@ namespace ClientDemo
                                     break;                                    
                                 }
                             }
-
                         }
                     } 
                 } 
@@ -367,8 +371,7 @@ namespace ClientDemo
                 if (XMSDK.H264_DVR_OpenSound(m_iPlayhandle))
                 {
                     menuSound.Checked = true;
-                }
-               
+                }               
             }
         }
 
@@ -393,7 +396,6 @@ namespace ClientDemo
                 {
                     menuTalk.Checked = true;
                 }
-
             }
         }
 
