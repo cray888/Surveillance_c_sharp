@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ClientDemo.Properties {
+namespace DVR2Mjpeg.Properties {
     using System;
     
     

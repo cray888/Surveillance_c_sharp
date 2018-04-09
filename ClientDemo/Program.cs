@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace ClientDemo
+namespace DVR2Mjpeg
 {
     static class Program
     {
@@ -14,7 +14,7 @@ namespace ClientDemo
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ClientDemo());
+            Application.Run(new DVR2Mjpeg());
         }
     }
 }

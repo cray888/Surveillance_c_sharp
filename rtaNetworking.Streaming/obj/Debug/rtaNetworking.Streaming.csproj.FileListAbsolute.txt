@@ -1,0 +1,23 @@
+U:\Development\Projects\VS 2008\Projects\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\ResolveAssemblyReference.cache
+U:\Development\Projects\VS 2008\Projects\rtaVideoStreamer\rtaNetworking.Streaming\bin\Debug\rtaNetworking.Streaming.dll
+U:\Development\Projects\VS 2008\Projects\rtaVideoStreamer\rtaNetworking.Streaming\bin\Debug\rtaNetworking.Streaming.pdb
+U:\Development\Projects\VS 2008\Projects\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.dll
+U:\Development\Projects\VS 2008\Projects\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.pdb
+C:\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\bin\Debug\rtaNetworking.Streaming.dll
+C:\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\bin\Debug\rtaNetworking.Streaming.pdb
+C:\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.csprojResolveAssemblyReference.cache
+C:\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.csproj.CoreCompileInputs.cache
+C:\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.dll
+C:\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.pdb
+C:\GitHub\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\bin\Debug\rtaNetworking.Streaming.dll
+C:\GitHub\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\bin\Debug\rtaNetworking.Streaming.pdb
+C:\GitHub\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.csprojResolveAssemblyReference.cache
+C:\GitHub\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.csproj.CoreCompileInputs.cache
+C:\GitHub\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.dll
+C:\GitHub\C_Sharp\rtaVideoStreamer\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.pdb
+C:\GitHub\C_Sharp\Surveillance_c_sharp\rtaNetworking.Streaming\bin\Debug\rtaNetworking.Streaming.dll
+C:\GitHub\C_Sharp\Surveillance_c_sharp\rtaNetworking.Streaming\bin\Debug\rtaNetworking.Streaming.pdb
+C:\GitHub\C_Sharp\Surveillance_c_sharp\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.csprojResolveAssemblyReference.cache
+C:\GitHub\C_Sharp\Surveillance_c_sharp\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.csproj.CoreCompileInputs.cache
+C:\GitHub\C_Sharp\Surveillance_c_sharp\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.dll
+C:\GitHub\C_Sharp\Surveillance_c_sharp\rtaNetworking.Streaming\obj\Debug\rtaNetworking.Streaming.pdb

@@ -1,4 +1,4 @@
-﻿namespace ClientDemo
+﻿namespace DVR2Mjpeg
 {
     partial class VideoForm
     {
@@ -35,7 +35,7 @@
             this.talkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.panelVideo = new System.Windows.Forms.Panel();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -89,13 +89,13 @@
             // 
             // panel1
             // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.panelVideo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel1.Location = new System.Drawing.Point(-1, 17);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(193, 187);
-            this.panel1.TabIndex = 2;
+            this.panelVideo.Location = new System.Drawing.Point(-1, 17);
+            this.panelVideo.Name = "panel1";
+            this.panelVideo.Size = new System.Drawing.Size(193, 187);
+            this.panelVideo.TabIndex = 2;
             // 
             // VideoForm
             // 
@@ -103,7 +103,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ContextMenuStrip = this.contextMenuStrip1;
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.panelVideo);
             this.Controls.Add(this.checkBox1);
             this.Name = "VideoForm";
             this.Size = new System.Drawing.Size(191, 203);
@@ -122,6 +122,6 @@
         private System.Windows.Forms.ToolStripMenuItem soundToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem talkToolStripMenuItem;
         private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panelVideo;
     }
 }

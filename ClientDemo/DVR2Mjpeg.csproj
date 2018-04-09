@@ -90,11 +90,11 @@
     <Compile Include="AddDevForm.Designer.cs">
       <DependentUpon>AddDevForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ClientDemo.cs">
+    <Compile Include="DVR2Mjpeg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ClientDemo.Designer.cs">
-      <DependentUpon>ClientDemo.cs</DependentUpon>
+    <Compile Include="DVR2Mjpeg.Designer.cs">
+      <DependentUpon>DVR2Mjpeg.cs</DependentUpon>
     </Compile>
     <Compile Include="DevConfigForm.cs">
       <SubType>Form</SubType>
@@ -108,7 +108,9 @@
     <Compile Include="DevForm.Designer.cs">
       <DependentUpon>DevForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PlayBackForm.cs" />
+    <Compile Include="PlayBackForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="PlayBackForm.Designer.cs">
       <DependentUpon>PlayBackForm.cs</DependentUpon>
     </Compile>
@@ -130,9 +132,9 @@
       <SubType>Designer</SubType>
       <DependentUpon>AddDevForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ClientDemo.resx">
+    <EmbeddedResource Include="DVR2Mjpeg.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>ClientDemo.cs</DependentUpon>
+      <DependentUpon>DVR2Mjpeg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DevConfigForm.resx">
       <SubType>Designer</SubType>
@@ -197,6 +199,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\rtaNetworking.Streaming\rtaNetworking.Streaming.csproj">
+      <Project>{f961a5df-7ae0-43f3-8ca3-01340d4a815f}</Project>
+      <Name>rtaNetworking.Streaming</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

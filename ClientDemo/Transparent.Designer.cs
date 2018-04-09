@@ -1,4 +1,4 @@
-﻿namespace ClientDemo
+﻿namespace DVR2Mjpeg
 {
     partial class Form_Transpanrent
     {

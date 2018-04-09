@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using System.Runtime.InteropServices;
-namespace ClientDemo
+namespace DVR2Mjpeg
 {
     public partial class AddDevForm : Form
     {
@@ -53,13 +53,13 @@ namespace ClientDemo
                 DEV_INFO devInfo = new DEV_INFO();
                 if ( nLoginID > 0 )
                 {
-                    ClientDemo clientForm = new ClientDemo();
+                    DVR2Mjpeg clientForm = new DVR2Mjpeg();
 
                     foreach( Form form in  Application.OpenForms)
                     {
                         if ( form.Name == "ClientDemo" )
                         {
-                            clientForm = (ClientDemo)form;
+                            clientForm = (DVR2Mjpeg)form;
                             break;
                         }
                     }
@@ -89,7 +89,7 @@ namespace ClientDemo
                     }
                    
                     clientForm.devForm.DevTree.Nodes.Add(nodeDev);
-                    ClientDemo.dictDevInfo.Add(devInfo.lLoginID, devInfo);
+                    DVR2Mjpeg.dictDevInfo.Add(devInfo.lLoginID, devInfo);
                     this.Close();
                 }
                 else

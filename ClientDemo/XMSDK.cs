@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace ClientDemo
+namespace DVR2Mjpeg
 {
     enum SearchModeType
     {

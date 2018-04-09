@@ -8,11 +8,14 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Drawing.Imaging;
+using System.Diagnostics;
 
-namespace ClientDemo
+namespace DVR2Mjpeg
 {
     public partial class VideoForm : UserControl
     {
+        private String TAG = "VideoForm";
+
         public bool m_bSaveImageStart;
         private System.Timers.Timer m_tTimer = new System.Timers.Timer(100);
 
@@ -27,6 +30,8 @@ namespace ClientDemo
 
         public VideoForm()
         {
+            Debug.WriteLine(TAG + ".VideoForm()");
+
             InitializeComponent();
             m_tTimer.Elapsed += M_tTimer_Elapsed;
             m_tTimer.AutoReset = true;
@@ -35,15 +40,18 @@ namespace ClientDemo
 
         public void SetWndIndex(int nIndex)
 	    {
-		    m_nIndex = nIndex;
+            Debug.WriteLine(TAG + ".SetWndIndex(" + nIndex.ToString() + ")", "info");
+            m_nIndex = nIndex;
 	    }
 
 	    public int ConnectRealPlay( ref DEV_INFO pDev, int nChannel)
         {
-            if(m_iPlayhandle != -1)
+            Debug.WriteLine(TAG + ".ConnectRealPlay(" + pDev.szDevName + "," + nChannel.ToString() + ")");
+
+            if (m_iPlayhandle != -1)
 	        {
 
-                if (0 != XMSDK.H264_DVR_StopRealPlay(m_iPlayhandle, (uint)this.panel1.Handle))
+                if (0 != XMSDK.H264_DVR_StopRealPlay(m_iPlayhandle, (uint)this.panelVideo.Handle))
 		        {
 
 		        }
@@ -58,10 +66,10 @@ namespace ClientDemo
 	        playstru.nChannel = nChannel;
 	        playstru.nStream = 1;
 	        playstru.nMode = 0;
-	        //playstru.hWnd=this.panel1.Handle;
-            if (this.InvokeRequired)
-                this.BeginInvoke((MethodInvoker)(() => playstru.hWnd = this.panel1.Handle));
-            else playstru.hWnd = this.panel1.Handle;
+            playstru.hWnd=this.panelVideo.Handle;
+            /*if (InvokeRequired)
+                BeginInvoke((MethodInvoker)(() => playstru.hWnd = this.panelVideo.Handle));
+            else playstru.hWnd = this.panelVideo.Handle;*/
             m_iPlayhandle = XMSDK.H264_DVR_RealPlay(pDev.lLoginID, ref playstru);	
 	        if(m_iPlayhandle <= 0 )
 	        {
@@ -189,7 +197,7 @@ namespace ClientDemo
         {
             if (m_iPlayhandle > 0)
             {
-                this.BeginInvoke((MethodInvoker)(() => XMSDK.H264_DVR_StopRealPlay(m_iPlayhandle, (uint)this.panel1.Handle)));                
+                this.BeginInvoke((MethodInvoker)(() => XMSDK.H264_DVR_StopRealPlay(m_iPlayhandle, (uint)this.panelVideo.Handle)));                
                 m_iPlayhandle = -1;
 
             }
@@ -245,9 +253,9 @@ namespace ClientDemo
 
         private void VideoForm_Click(object sender, EventArgs e)
         {
-            ClientDemo clientdemo = (ClientDemo)this.Parent;
-            clientdemo.SetActiveWnd(m_nIndex);
-            clientdemo.comboBox1.Focus();
+            DVR2Mjpeg DVR2Mjpeg = (DVR2Mjpeg)this.Parent;
+            DVR2Mjpeg.SetActiveWnd(m_nIndex);
+            DVR2Mjpeg.comboBoxCamCount.Focus();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -257,13 +265,18 @@ namespace ClientDemo
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            Close();
+        }
+
+        public void Close()
+        {
             if (-1 != m_nIndex)
             {
-                XMSDK.H264_DVR_StopRealPlay(m_iPlayhandle,(uint)this.panel1.Handle);
-                ClientDemo clientdemo = (ClientDemo)this.Parent;
-                clientdemo.DrawActivePage(false);
+                XMSDK.H264_DVR_StopRealPlay(m_iPlayhandle, (uint)this.panelVideo.Handle);
+                DVR2Mjpeg DVR2Mjpeg = (DVR2Mjpeg)this.Parent;
+                DVR2Mjpeg.DrawActivePage(false);
 
-                foreach (TreeNode node in clientdemo.devForm.DevTree.Nodes)
+                foreach (TreeNode node in DVR2Mjpeg.devForm.DevTree.Nodes)
                 {
                     if (node.Name == "Device")
                     {
@@ -280,9 +293,9 @@ namespace ClientDemo
                                 }
                             }
                         }
-                    }                   
+                    }
                 }
-            }           
+            }
         }
 
         private void catchPictureToolStripMenuItem_Click(object sender, EventArgs e)
@@ -290,8 +303,8 @@ namespace ClientDemo
             if ( m_nIndex > -1 && m_iPlayhandle > 0)
             {
                 String strPath;
-                ClientDemo clientdemo = (ClientDemo)this.Parent;
-                foreach (TreeNode node in clientdemo.devForm.DevTree.Nodes)
+                DVR2Mjpeg DVR2Mjpeg = (DVR2Mjpeg)this.Parent;
+                foreach (TreeNode node in DVR2Mjpeg.devForm.DevTree.Nodes)
                 {
                     if (node.Name == "Device")
                     {

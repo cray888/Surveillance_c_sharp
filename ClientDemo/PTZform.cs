@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace ClientDemo
+namespace DVR2Mjpeg
 {
     public partial class PTZForm : Form
     {
@@ -18,7 +18,7 @@ namespace ClientDemo
  
         private void PTZControl(int nCommand, bool bStop, int nSpeed)
         {
-            ClientDemo clientForm = (ClientDemo)this.Owner;
+            DVR2Mjpeg clientForm = (DVR2Mjpeg)this.Owner;
             int nCurVideoform = clientForm.m_nCurIndex;
             if (nCurVideoform >= 0)
             {

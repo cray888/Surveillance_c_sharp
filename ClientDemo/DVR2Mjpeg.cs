@@ -1,42 +1,51 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Threading;
-namespace ClientDemo
+using System.Diagnostics;
+using rtaNetworking.Streaming;
+
+namespace DVR2Mjpeg
 {
-    public partial class ClientDemo : Form
+    public partial class DVR2Mjpeg : Form, IWebServerCallback
     {
+        //Service variable
+        private String TAG = "DVR2Mjpeg";
+
+        //HTTP server variable
+        private ImageStreamingServer _Server;
+        private int[] n_clientConnected = new int[32];
+
+        //DVR variable
         public PTZForm m_formPTZ;
         public DevConfigForm m_formCfg;
-        public int m_nCurIndex = -1;
-        public int m_nTotalWnd = 4;
-        public DEV_INFO m_devInfo = new DEV_INFO();
         public VideoForm[] m_videoform = new VideoForm[32];
-        public bool m_bArray;
+
+        public int m_nCurIndex = -1;
+        public int m_nTotalWnd = 32;
+        public DEV_INFO m_devInfo = new DEV_INFO();        
+        //public bool m_bArray;
         public static Dictionary<int , DEV_INFO> dictDevInfo = new Dictionary<int , DEV_INFO>();
         public static Dictionary<int, DEV_INFO> dictDiscontDev = new Dictionary<int, DEV_INFO>();
 
         private System.Timers.Timer timerDisconnect = new System.Timers.Timer(30000);
-
-        private XMSDK.fDisConnect disCallback;
-        private XMSDK.fMessCallBack msgcallback;
-
         private System.Timers.ElapsedEventHandler reconnect;
+        private XMSDK.fDisConnect disCallback;
+        private XMSDK.fMessCallBack msgcallback;        
 
         bool  MessCallBack(int  lLoginID, string pBuf,uint dwBufLen, IntPtr dwUser)
         {
-            ClientDemo form = new ClientDemo();
+            DVR2Mjpeg form = new DVR2Mjpeg();
             Marshal.PtrToStructure(dwUser, form);
 	        return form.DealwithAlarm(lLoginID,pBuf,dwBufLen);
         }
 
         void DisConnectBackCallFunc(int lLoginID, string pchDVRIP, int nDVRPort, IntPtr dwUser)
         {
+            Debug.WriteLine(TAG + ".DisConnectBackCallFunc(" + lLoginID.ToString() + "," + pchDVRIP + "," + nDVRPort.ToString() + ",dwUser" + ")");
+
             for (int i = 0; i < 16; i++)
             {
                 if (lLoginID == m_videoform[i].GetLoginHandle())
@@ -64,60 +73,69 @@ namespace ClientDemo
             }
         }
 
-        public ClientDemo()
+        public DVR2Mjpeg()
         {
+            Debug.WriteLine(TAG + ".DVR2Mjpeg()");
+
+            InitializeComponent();
+
             for (int i = 0; i < 32; i++)
             {
                 m_videoform[i] = new VideoForm();
                 this.Controls.Add(this.m_videoform[i]);
                 m_videoform[i].SetWndIndex(i);
-            }
-            InitializeComponent();
+            }            
             devForm = new DevForm();
             this.Controls.Add(devForm);
-            devForm.Location = new System.Drawing.Point(880, 10);
-            devForm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));  
-            this.comboBox1.SelectedIndex = 1;
+            devForm.Location = new Point(880, 10);
+            devForm.Anchor = (AnchorStyles.Top | AnchorStyles.Right);  
+            this.comboBoxCamCount.SelectedIndex = 4;
+
             InitSDK();
             devForm.ReadXML();
+
             reconnect = new System.Timers.ElapsedEventHandler(ReConnect);
             GC.KeepAlive(reconnect);
             timerDisconnect.Elapsed += new System.Timers.ElapsedEventHandler(reconnect); 
        
-            ArrayWindow(4);
+            ArrayWindow(32);
             SetActiveWnd(0);   
         }
 
+        public DVR2Mjpeg(bool noInit) { }
+
         private void OpenChanel(int indexWind, int chanelID, bool savePicture)
         {
+            Debug.WriteLine(TAG + ".OpenChanel(" + indexWind.ToString() + "," + chanelID + "," + savePicture.ToString() + ")");
+
             TreeNode nodeDev = devForm.DevTree.Nodes[0];
             DEV_INFO devinfo = (DEV_INFO)nodeDev.Tag;
             CHANNEL_INFO chanInfo = (CHANNEL_INFO)nodeDev.Nodes[chanelID].Tag;
             int iRealHandle = m_videoform[indexWind].ConnectRealPlay(ref devinfo, chanInfo.nChannelNo);
             if (iRealHandle > 0)
             {
-                CHANNEL_INFO chInfo = chanInfo;
-                chInfo.nWndIndex = indexWind;
-                nodeDev.Nodes[chanelID].Tag = chInfo;
+                chanInfo.nWndIndex = indexWind;
+                nodeDev.Nodes[chanelID].Tag = chanInfo;
 
-                if (savePicture) ((VideoForm)m_videoform[indexWind]).setSavePicture(savePicture);
+                if (savePicture) m_videoform[indexWind].setSavePicture(savePicture);
             }
         }
 
-        private void btnTransparent_Click(object sender, EventArgs e)
+        private void CloseChanel(int indexWind)
         {
-            Form_Transpanrent formTransparent = new Form_Transpanrent();
-            formTransparent.Show();
+            m_videoform[indexWind].Close();
+            m_videoform[indexWind].setSavePicture(false);
         }
 
         public int InitSDK()
         {
+            Debug.WriteLine(TAG + ".InitSDK()");
+
             //initialize
             disCallback = new XMSDK.fDisConnect(DisConnectBackCallFunc);
             GC.KeepAlive(disCallback);
             int bResult = XMSDK.H264_DVR_Init(disCallback, this.Handle);
 
-            //he messages received in SDK from DVR which need to upload£¬ such as alarm information£¬diary information£¬may do through callback function
             msgcallback  = new XMSDK.fMessCallBack(MessCallBack);
             XMSDK.H264_DVR_SetDVRMessCallBack(msgcallback, this.Handle);
             XMSDK.H264_DVR_SetConnectTime(5000, 3);
@@ -127,6 +145,8 @@ namespace ClientDemo
 
         public bool ExitSDk()
         {
+            Debug.WriteLine(TAG + ".ExitSDk()");
+
             return XMSDK.H264_DVR_Cleanup();
         }
 
@@ -148,6 +168,7 @@ namespace ClientDemo
             }
             
             int nNull = 3;
+            int nCount;
 
             switch (iNumber)
             {
@@ -187,22 +208,105 @@ namespace ClientDemo
                 case 16:
                     for (i = 0; i < 4; i++)
                     {
-                        m_videoform[i].SetBounds(3 + i * (iWidth / 4) + (i) * nNull, 0, (iWidth / 4), iHeight / 4);
+                        m_videoform[i].SetBounds(
+                            3 + i * (iWidth / 4) + (i) * nNull, 
+                            0, 
+                            (iWidth / 4), 
+                            iHeight / 4
+                        );
                         m_videoform[i].Show();
                     }
                     for (i = 4; i < 8; i++)
                     {
-                        m_videoform[i].SetBounds(3 + (i - 4) * (iWidth / 4) + (i - 4) * nNull, iHeight / 4 + nNull, (iWidth / 4), iHeight / 4);
+                        m_videoform[i].SetBounds(
+                            3 + (i - 4) * (iWidth / 4) + (i - 4) * nNull, 
+                            iHeight / 4 + nNull, 
+                            (iWidth / 4), 
+                            iHeight / 4
+                        );
                         m_videoform[i].Show();
                     }
                     for (i = 8; i < 12; i++)
                     {
-                        m_videoform[i].SetBounds(3 + (i - 8) * (iWidth / 4) + (i - 8) * nNull, iHeight / 2 + 2 * nNull, (iWidth / 4), iHeight / 4);
+                        m_videoform[i].SetBounds(
+                            3 + (i - 8) * (iWidth / 4) + (i - 8) * nNull, 
+                            iHeight / 2 + 2 * nNull, 
+                            (iWidth / 4), 
+                            iHeight / 4
+                        );
                         m_videoform[i].Show();
                     }
                     for (i = 12; i < 16; i++)
                     {
-                        m_videoform[i].SetBounds(3 + (i - 12) * (iWidth / 4) + (i - 12) * nNull, 3 * iHeight / 4 + 3 * nNull, (iWidth / 4), iHeight / 4);
+                        m_videoform[i].SetBounds(
+                            3 + (i - 12) * (iWidth / 4) + (i - 12) * nNull, 
+                            3 * iHeight / 4 + 3 * nNull, 
+                            (iWidth / 4), 
+                            iHeight / 4
+                        );
+                        m_videoform[i].Show();
+                    }
+                    break;
+                case 32:
+                    nCount = 6;
+                    for (i = 0; i < 6; i++)
+                    {
+                        m_videoform[i].SetBounds(
+                            3 + i * (iWidth / 6) + (i) * nNull,
+                            0, 
+                            iWidth / 6, 
+                            iHeight / 6
+                        );
+                        m_videoform[i].Show();
+                    }
+                    for (i = 6; i < 12; i++)
+                    {
+                        m_videoform[i].SetBounds(
+                            3 + (i - 6) * (iWidth / 6) + (i - 6) * nNull, 
+                            iHeight / 6 + nNull, 
+                            iWidth / 6, 
+                            iHeight / 6
+                        );
+                        m_videoform[i].Show();
+                    }
+                    for (i = 12; i < 18; i++)
+                    {
+                        m_videoform[i].SetBounds(
+                            3 + (i - 12) * (iWidth / 6) + (i - 12) * nNull,
+                            2 * iHeight / 6 + 2 * nNull,
+                            iWidth / 6,
+                            iHeight / 6
+                        );
+                        m_videoform[i].Show();
+                    }
+                    for (i = 18; i < 24; i++)
+                    {
+                        m_videoform[i].SetBounds(
+                            3 + (i - 18) * (iWidth / 6) + (i - 18) * nNull,
+                            3 * iHeight / 6 + 3 * nNull,
+                            iWidth / 6,
+                            iHeight / 6
+                        );
+                        m_videoform[i].Show();
+                    }
+                    for (i = 24; i < 30; i++)
+                    {
+                        m_videoform[i].SetBounds(
+                            3 + (i - 24) * (iWidth / 6) + (i - 24) * nNull,
+                            4 * iHeight / 6 + 4 * nNull,
+                            iWidth / 6,
+                            iHeight / 6
+                        );
+                        m_videoform[i].Show();
+                    }
+                    for (i = 30; i < 32; i++)
+                    {
+                        m_videoform[i].SetBounds(
+                            3 + (i - 30) * (iWidth / 6) + (i - 30) * nNull,
+                            5 * iHeight / 6 + 5 * nNull,
+                            iWidth / 6,
+                            iHeight / 6
+                        );
                         m_videoform[i].Show();
                     }
                     break;
@@ -272,6 +376,7 @@ namespace ClientDemo
 
             return true;
         }
+
         public void SetActiveWnd(int nIndex)
         {
             if (-1 != m_nCurIndex && m_nCurIndex != nIndex)
@@ -288,6 +393,8 @@ namespace ClientDemo
 
         public int Connect(ref DEV_INFO pDev, int nChannel, int nWndIndex)
         {
+            Debug.WriteLine(TAG + ".Connect(" + pDev.szDevName + "," + nChannel.ToString() + "," + nWndIndex.ToString() + ")");
+
             int nRet = 0;
 
             //if device did not login,login first
@@ -371,6 +478,7 @@ namespace ClientDemo
             if (!XMSDK.H264_DVR_ClickKey(m_videoform[m_nCurIndex].m_lLogin, ref vKeyBoardData))
                MessageBox.Show("AccountMSG.Failed");
         }
+
         public void NetAlarmMsg(uint dwValue, uint dwState)
         {
             if (m_devInfo.lLoginID > 0)
@@ -391,8 +499,10 @@ namespace ClientDemo
 
         public void ReConnect(object source, System.Timers.ElapsedEventArgs e)
         {
+            Debug.WriteLine(TAG + ".ReConnect(source,e)");
+
             Dictionary<int, DEV_INFO> dictDiscontDevCopy = new Dictionary<int, DEV_INFO>(dictDiscontDev);
-            foreach ( DEV_INFO devinfo in dictDiscontDevCopy.Values )
+            foreach (DEV_INFO devinfo in dictDiscontDevCopy.Values)
             {
                 H264_DVR_DEVICEINFO OutDev = new H264_DVR_DEVICEINFO();
                 int nError = 0;
@@ -414,19 +524,19 @@ namespace ClientDemo
                 }
                 dictDiscontDev.Remove(devinfo.lLoginID);
 
-                ClientDemo clientForm = new ClientDemo();
+                DVR2Mjpeg clientForm = new DVR2Mjpeg(true);
 
                 foreach (Form form in Application.OpenForms)
                 {
                     if (form.Name == "ClientDemo")
                     {
-                        clientForm = (ClientDemo)form;
+                        clientForm = (DVR2Mjpeg)form;
                         break;
                     }
                 }
                 DEV_INFO devAdd = new DEV_INFO();
                 devAdd = devinfo;
-                devAdd.lLoginID = lLogin;           
+                devAdd.lLoginID = lLogin;
 
                 foreach (TreeNode node in clientForm.devForm.DevTree.Nodes)
                 {
@@ -451,12 +561,21 @@ namespace ClientDemo
                             foreach (TreeNode channelnode in node.Nodes)
                             {
                                 CHANNEL_INFO chInfo = (CHANNEL_INFO)channelnode.Tag;
-                                if ( chInfo.nWndIndex > -1  )
+                                if (chInfo.nWndIndex > -1)
                                 {
-                                    clientForm.m_videoform[chInfo.nWndIndex].ConnectRealPlay(ref devAdd, chInfo.nChannelNo);
-                                    Thread.Sleep(10);
+                                    if (InvokeRequired)
+                                    {
+                                        BeginInvoke((MethodInvoker)(() =>
+                                        {
+                                            clientForm.m_videoform[chInfo.nWndIndex].ConnectRealPlay(ref devAdd, chInfo.nChannelNo);
+                                        }));
+                                    }
+                                    else
+                                    {
+                                        clientForm.m_videoform[chInfo.nWndIndex].ConnectRealPlay(ref devAdd, chInfo.nChannelNo);                                        
+                                    }
+                                    Thread.Sleep(100);
                                 }
-                                
                             }
                             break;
                         }
@@ -466,6 +585,7 @@ namespace ClientDemo
                 dictDevInfo.Add(lLogin, devAdd);
                 XMSDK.H264_DVR_SetupAlarmChan(lLogin);
             }
+
             if (0 == dictDiscontDev.Count)
             {
                 timerDisconnect.Enabled = false;
@@ -473,34 +593,38 @@ namespace ClientDemo
             }
         }       
 
-        private void ClientDemo_Paint(object sender, PaintEventArgs e)
+        private void DVR2Mjpeg_Paint(object sender, PaintEventArgs e)
         {
             SetActiveWnd(m_nCurIndex);
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void comboBoxCamCount_SelectedIndexChanged(object sender, EventArgs e)
         {
             int nWndNum = 4;
-            if (comboBox1.SelectedIndex == 0)
+            if (comboBoxCamCount.SelectedIndex == 0)
             {
                 nWndNum = 1;
             }
-            else if (comboBox1.SelectedIndex == 1)
+            else if (comboBoxCamCount.SelectedIndex == 1)
             {
                 nWndNum = 4;
             }
-            else if (comboBox1.SelectedIndex == 2)
+            else if (comboBoxCamCount.SelectedIndex == 2)
             {
                 nWndNum = 9;
             }
-            else if (comboBox1.SelectedIndex == 3)
+            else if (comboBoxCamCount.SelectedIndex == 3)
             {
                 nWndNum = 16;
+            }
+            else if (comboBoxCamCount.SelectedIndex == 4)
+            {
+                nWndNum = 32;
             }
             ArrayWindow(nWndNum);
         }
 
-        private void ClientDemo_KeyUp(object sender, KeyEventArgs e)
+        private void DVR2Mjpeg_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {                 
@@ -508,9 +632,15 @@ namespace ClientDemo
             }
         }
 
-        private void ClientDemo_FormClosing(object sender, FormClosingEventArgs e)
+        private void DVR2Mjpeg_FormClosing(object sender, FormClosingEventArgs e)
         {
             ExitSDk();
+        }
+
+        private void btnTransparent_Click(object sender, EventArgs e)
+        {
+            Form_Transpanrent formTransparent = new Form_Transpanrent();
+            formTransparent.Show();
         }
 
         private void btnplayback_Click(object sender, EventArgs e)
@@ -519,7 +649,7 @@ namespace ClientDemo
             formPlayBack.Show();            
         }
 
-        private void ClientDemo_FormClosed(object sender, FormClosedEventArgs e)
+        private void DVR2Mjpeg_FormClosed(object sender, FormClosedEventArgs e)
         {
 
             foreach (DEV_INFO devinfo in dictDevInfo.Values)
@@ -545,12 +675,72 @@ namespace ClientDemo
             m_formCfg.Show();
         }
 
-        private void ClientDemo_Load(object sender, EventArgs e)
+        private void DVR2Mjpeg_Load(object sender, EventArgs e)
         {
-            OpenChanel(0, 18, true);
-            OpenChanel(1, 24, true);
-            OpenChanel(2, 1, true);
-            OpenChanel(3, 12, true);
+            OpenCams();
+            _Server = new ImageStreamingServer();
+            _Server.Start(8080, this);
+        }
+
+        private void OpenCams()
+        {            
+            /*OpenChanel(1, 1, true);
+            OpenChanel(12, 12, true);
+            OpenChanel(18, 18, true);
+            OpenChanel(24, 24, true);*/
+        }
+
+        public void OnClientConnect(int chanel)
+        {
+            chanel--;
+
+            n_clientConnected[chanel]++;
+
+            if (n_clientConnected[chanel] == 1)
+            {
+                if (this.InvokeRequired)
+                    this.BeginInvoke((MethodInvoker)(() => OpenChanel(chanel, chanel, true)));
+                else OpenChanel(chanel, chanel, true);
+
+                Thread.Sleep(1000);
+            }
+        }
+
+        public void OnClientDisconnect(int chanel)
+        {
+            chanel--;
+
+            n_clientConnected[chanel]--;
+
+            if (n_clientConnected[chanel] == 0)
+            {
+                if (InvokeRequired)
+                    BeginInvoke((MethodInvoker)(() => CloseChanel(chanel)));
+                else CloseChanel(chanel);
+            }
+        }
+
+        public void OnClientRequestShot(int chanel)
+        {
+            chanel--;
+
+            n_clientConnected[chanel]++;
+            if (n_clientConnected[chanel] == 1)
+            {
+                if (this.InvokeRequired)
+                    this.BeginInvoke((MethodInvoker)(() => OpenChanel(chanel, chanel, true)));
+                else OpenChanel(chanel, chanel, true);
+            }
+
+            Thread.Sleep(1000);
+
+            n_clientConnected[chanel]--;
+            if (n_clientConnected[chanel] == 0)
+            {
+                if (InvokeRequired)
+                    BeginInvoke((MethodInvoker)(() => CloseChanel(chanel)));
+                else CloseChanel(chanel);
+            }
         }
     }
 }

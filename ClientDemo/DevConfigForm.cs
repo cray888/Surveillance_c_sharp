@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
-namespace ClientDemo
+namespace DVR2Mjpeg
 {
     public partial class DevConfigForm : Form
     {
@@ -18,7 +18,7 @@ namespace ClientDemo
         private void DevConfigForm_Shown(object sender, EventArgs e)
         {
             comboBoxDevice.ResetText();
-            ClientDemo clientForm = (ClientDemo)this.Owner;
+            DVR2Mjpeg clientForm = (DVR2Mjpeg)this.Owner;
             TreeNodeCollection nodeCollection = clientForm.devForm.DevTree.Nodes;
             foreach (TreeNode node in nodeCollection)
             {

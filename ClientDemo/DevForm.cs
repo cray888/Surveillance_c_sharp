@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Xml;
-namespace ClientDemo
+namespace DVR2Mjpeg
 {
      
     public partial class DevForm : UserControl
@@ -185,19 +185,20 @@ namespace ClientDemo
                 }
 
                 DevTree.Nodes.Add(nodeDev);
-                ClientDemo.dictDevInfo.Add(devInfo.lLoginID, devInfo);
+                DVR2Mjpeg.dictDevInfo.Add(devInfo.lLoginID, devInfo);
 
             }
             return devInfo;
         }
+
         int DevLogin(ref DEV_INFO pdev)
         {
-            if (Convert.ToBoolean(pdev.bSerialID))//如果之前是DDNS获取ip;这里先获取动态ip
+            if (Convert.ToBoolean(pdev.bSerialID))
             {
-                int maxDeviceNum = 100;  //最大支持设备数量100
+                int maxDeviceNum = 100;
                 DDNS_INFO[] pDDNSInfo = new DDNS_INFO[maxDeviceNum];
                 SearchMode searchmode;
-                int nReNum = 0;  //实际获得的设备数量		
+                int nReNum = 0; 		
                 searchmode.nType = (int)SearchModeType.DDNS_SERIAL;
                 searchmode.szSerIP = pdev.szSerIP;
                 searchmode.nSerPort = pdev.nSerPort;
@@ -213,8 +214,8 @@ namespace ClientDemo
 
             H264_DVR_DEVICEINFO OutDev;
             int nError = 0;
-            //设置尝试连接设备次数和等待时间
-            XMSDK.H264_DVR_SetConnectTime(3000, 1);//设置尝试连接1次，等待时间3s
+
+            XMSDK.H264_DVR_SetConnectTime(3000, 1);
 
             int lLogin = XMSDK.H264_DVR_Login(pdev.szIpaddress, Convert.ToUInt16(pdev.nPort), pdev.szUserName,
                 pdev.szPsw, out OutDev,  out nError,SocketStyle.TCPSOCKET);
@@ -253,11 +254,11 @@ namespace ClientDemo
                 TreeNode nodeDev = e.Node.Parent;
                 DEV_INFO devinfo = (DEV_INFO)nodeDev.Tag;
                 CHANNEL_INFO chanInfo = (CHANNEL_INFO)e.Node.Tag;
-                int iRealHandle = ((ClientDemo)this.Parent).m_videoform[((ClientDemo)this.Parent).m_nCurIndex].ConnectRealPlay(ref devinfo, chanInfo.nChannelNo);
+                int iRealHandle = ((DVR2Mjpeg)this.Parent).m_videoform[((DVR2Mjpeg)this.Parent).m_nCurIndex].ConnectRealPlay(ref devinfo, chanInfo.nChannelNo);
                 if ( iRealHandle > 0 )
                 {
                     CHANNEL_INFO chInfo = (CHANNEL_INFO)e.Node.Tag;
-                    chInfo.nWndIndex = ((ClientDemo)this.Parent).m_nCurIndex;
+                    chInfo.nWndIndex = ((DVR2Mjpeg)this.Parent).m_nCurIndex;
                     e.Node.Tag = chInfo;
                 }
             }

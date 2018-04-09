@@ -8,26 +8,8 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Threading;
-namespace ClientDemo
+namespace DVR2Mjpeg
 {
-    public class ComboxItem
-    {
-        public string Text = "";
-
-        public object Value = new object() ;
-        public ComboxItem(string _Text, object _Value)
-        {
-            Text = _Text;
-            Value = _Value;
-        }
-
-        public override string ToString()
-        {
-            return Text;
-        }
-    }
-
-
     public partial class PlayBackForm : Form
     {
         enum PlayBackFileType
@@ -67,39 +49,39 @@ namespace ClientDemo
         int m_nFastTypeNet = 0; //网络快播速度  
         int m_nSlowTypeLocal = 0;  // 网络慢波速度
         int m_nSlowTypeNet = 0;  // 网络慢波速度
-       
-	    bool m_bDownloadByTime = false;
-	    bool m_bDownloadByName = true;
-	    uint m_nPlaybackDecHandle = 0;
-        int m_nLocalplayHandle = 0;   
-	    int m_nNetPlayHandle = 0;
-	    int m_DownLoadFileHandle = 0;
+
+        bool m_bDownloadByTime = false;
+        bool m_bDownloadByName = true;
+        uint m_nPlaybackDecHandle = 0;
+        int m_nLocalplayHandle = 0;
+        int m_nNetPlayHandle = 0;
+        int m_DownLoadFileHandle = 0;
         Thread thread;
-	   // bool m_bPause = false;
-	    int m_nCurRecNum=0;	
-	    int m_ListFindNum=0;
+        // bool m_bPause = false;
+        int m_nCurRecNum = 0;
+        int m_ListFindNum = 0;
         int m_SliderPos = 0;
-	    long m_PreTime = 0;
-        
+        long m_PreTime = 0;
+
         H264_DVR_FINDINFO[] m_nSearchInfo = new H264_DVR_FINDINFO[100];
-        
+
         List<H264_DVR_FILE_DATA> m_listFile = new List<H264_DVR_FILE_DATA>();
         List<H264_DVR_FINDINFO> m_listFindInfo = new List<H264_DVR_FINDINFO>();
-             
 
-        int   m_nGetPage = 0;
-        int   m_nCurPage = 0;
-        int   m_nTotalPage = 0;
-      
+
+        int m_nGetPage = 0;
+        int m_nCurPage = 0;
+        int m_nTotalPage = 0;
+
         bool m_bOpenAudio = false;
 
 
 
         public delegate int NetDataCallBack_V2(int lRealHandle, ref PACKET_INFO_EX pFrame, int dwUser);
-        public delegate void SDKDownLoadPosCallback( int lPlayHandle, int lTotalSize, int lDownLoadSize, int dwUser );
+        public delegate void SDKDownLoadPosCallback(int lPlayHandle, int lTotalSize, int lDownLoadSize, int dwUser);
 
         private int NetCallBack_V2(int lRealHandle, ref PACKET_INFO_EX pFrame, int dwUser)
-        {	
+        {
 
             //bool bResult = ;
             //try
@@ -112,20 +94,20 @@ namespace ClientDemo
             //}
 
             return 0;
-        	
+
         }
 
-         private void DownLoadPosCallback ( int lPlayHandle, 
-														   int lTotalSize, 
-														   int lDownLoadSize, 
-														   int dwUser)
-        {	         	
-	        if ( 0xfffffff == lDownLoadSize )
-	        {
-                this.pictureBoxNetVideoWnd.Refresh();	
-		        progressBarDownloadPos.Value = 0;
+        private void DownLoadPosCallback(int lPlayHandle,
+                                                          int lTotalSize,
+                                                          int lDownLoadSize,
+                                                          int dwUser)
+        {
+            if (0xfffffff == lDownLoadSize)
+            {
+                this.pictureBoxNetVideoWnd.Refresh();
+                progressBarDownloadPos.Value = 0;
                 timerDownload.Stop();
-	        }
+            }
         }
 
         private int RealDataCallBack(int lRealHandle, int dwDataType, string strBuf, int lbufsize, int dwUser)
@@ -140,9 +122,8 @@ namespace ClientDemo
             trackBarLocalPlayPos.SetRange(0, 1000);
             trackBarNetPlayPos.SetRange(0, 1000);
             beginTime.Value = System.DateTime.Now.Date;
-            
-        }
 
+        }
 
         void FileEndCallBack(uint lPlayHand, uint nUser)
         {
@@ -154,18 +135,18 @@ namespace ClientDemo
             trackBarLocalPlayPos.Value = 0;
         }
 
-        public void recordTime(object source,System.Timers.ElapsedEventArgs e)
+        public void recordTime(object source, System.Timers.ElapsedEventArgs e)
         {
             if (!m_bPauseLocalPlay)
-            { 
+            {
                 float pos = XMSDK.H264_DVR_GetPlayPos(m_nLocalplayHandle);
-                trackBarLocalPlayPos.Value = Convert.ToInt32(pos*1000);
+                trackBarLocalPlayPos.Value = Convert.ToInt32(pos * 1000);
             }
- 
+
             if (!m_bPauseNetPlay)
             {
                 float pos = XMSDK.H264_DVR_GetPlayPos(m_nNetPlayHandle);
-                this.BeginInvoke((MethodInvoker)(() => trackBarNetPlayPos.Value = Convert.ToInt32(pos * 1000)));                
+                this.BeginInvoke((MethodInvoker)(() => trackBarNetPlayPos.Value = Convert.ToInt32(pos * 1000)));
             }
 
             if (m_DownLoadFileHandle != 0)
@@ -179,7 +160,7 @@ namespace ClientDemo
                     btnDownload.Text = "Download";
                     MessageBox.Show("Get download process fail !");
                     timerDownload.Stop();
-                    
+
                 }
                 if (nPos == 100)		//download end
                 {
@@ -206,8 +187,8 @@ namespace ClientDemo
                     progressBarDownloadPos.Value = nPos;
                 }
             }
-            
-         }
+
+        }
 
 
         private void btnOpenFile_Click(object sender, EventArgs e)
@@ -223,15 +204,15 @@ namespace ClientDemo
             {
                 String fileName = fileDialog.FileName;
                 // 使用文件名
-                m_nLocalplayHandle =  Convert.ToInt32(XMSDK.H264_DVR_StartLocalPlay( fileName, pictureBoxVideoWnd.Handle,null,Convert.ToUInt32(0) ));
-                if ( m_nLocalplayHandle > 0)
+                m_nLocalplayHandle = Convert.ToInt32(XMSDK.H264_DVR_StartLocalPlay(fileName, pictureBoxVideoWnd.Handle, null, Convert.ToUInt32(0)));
+                if (m_nLocalplayHandle > 0)
                 {
-                 //   MessageBox.Show("success");
+                    //   MessageBox.Show("success");
                     timerLocalPlayBack.Elapsed += new System.Timers.ElapsedEventHandler(recordTime);
                     timerLocalPlayBack.AutoReset = true;
                     timerLocalPlayBack.Enabled = true;
                     XMSDK.fLocalPlayFileCallBack fileEndCallBack = new XMSDK.fLocalPlayFileCallBack(FileEndCallBack);
-                    XMSDK.H264_DVR_SetFileEndCallBack(m_nLocalplayHandle,fileEndCallBack, this.Handle );
+                    XMSDK.H264_DVR_SetFileEndCallBack(m_nLocalplayHandle, fileEndCallBack, this.Handle);
                 }
                 else
                 {
@@ -241,7 +222,7 @@ namespace ClientDemo
             else
             {
                 // 没有选择文件时的操作
-            } 
+            }
 
         }
 
@@ -270,7 +251,7 @@ namespace ClientDemo
                 m_nFastTypeLocal = 1;
             }
             m_nSlowTypeLocal = 0;
-            XMSDK.H264_DVR_LocalPlayCtrl(m_nLocalplayHandle, SDK_LoalPlayAction.SDK_Local_PLAY_FAST, Convert.ToUInt32(m_nFastTypeLocal));	
+            XMSDK.H264_DVR_LocalPlayCtrl(m_nLocalplayHandle, SDK_LoalPlayAction.SDK_Local_PLAY_FAST, Convert.ToUInt32(m_nFastTypeLocal));
         }
 
         private void btnLocalSlow_Click(object sender, EventArgs e)
@@ -280,7 +261,7 @@ namespace ClientDemo
                 m_nSlowTypeLocal = 1;
             }
             m_nFastTypeLocal = 0;
-            XMSDK.H264_DVR_LocalPlayCtrl(m_nLocalplayHandle, SDK_LoalPlayAction.SDK_Local_PLAY_SLOW, Convert.ToUInt32(m_nSlowTypeLocal));	
+            XMSDK.H264_DVR_LocalPlayCtrl(m_nLocalplayHandle, SDK_LoalPlayAction.SDK_Local_PLAY_SLOW, Convert.ToUInt32(m_nSlowTypeLocal));
         }
 
         private void btnLocalPlay_Click(object sender, EventArgs e)
@@ -301,7 +282,7 @@ namespace ClientDemo
             }
             m_nSlowTypeLocal = 0;
             m_nFastTypeLocal = 0;
-	
+
         }
 
         private void trackBarPlayPos_Scroll(object sender, EventArgs e)
@@ -317,20 +298,20 @@ namespace ClientDemo
             if (tabControlPlayBack.SelectedTab.Name == "tabPageRemovePlayBack")
             {
                 comboDev.Items.Clear();
-                ClientDemo clientForm = new ClientDemo();
+                DVR2Mjpeg clientForm = new DVR2Mjpeg();
 
                 foreach (Form form in Application.OpenForms)
                 {
                     if (form.Name == "ClientDemo")
                     {
-                        clientForm = (ClientDemo)form;
+                        clientForm = (DVR2Mjpeg)form;
                         break;
                     }
                 }
 
                 foreach (TreeNode node in clientForm.devForm.DevTree.Nodes)
                 {
-                    ComboxItem item = new ComboxItem(node.Text,node.Tag);
+                    ComboxItem item = new ComboxItem(node.Text, node.Tag);
                     comboDev.Items.Add(item);
                 }
 
@@ -347,14 +328,14 @@ namespace ClientDemo
                 comboRecordType.Items.Add("Capture timing");
                 comboRecordType.Items.Add("Manual capture");
                 comboRecordType.SelectedIndex = 0;
-                
+
                 checkFile.Checked = true;
             }
             else
             {
 
             }
-           
+
         }
 
         private void checkFile_CheckedChanged(object sender, EventArgs e)
@@ -374,7 +355,7 @@ namespace ClientDemo
                 m_bDownloadByTime = true;
                 m_bDownloadByName = false;
                 checkFile.Checked = false;
-            } 
+            }
 
         }
 
@@ -386,157 +367,157 @@ namespace ClientDemo
             m_nTotalPage = 0;
 
             // 条件检测
-           if(comboDev.SelectedIndex < 0)
-           {
-               MessageBox.Show("Select a Device!");
-               return;
-           }
-           if (!checkFile.Checked && !checkTime.Checked)
-           {
-               MessageBox.Show("Select a Search mode!");
-               return;
-           }
+            if (comboDev.SelectedIndex < 0)
+            {
+                MessageBox.Show("Select a Device!");
+                return;
+            }
+            if (!checkFile.Checked && !checkTime.Checked)
+            {
+                MessageBox.Show("Select a Search mode!");
+                return;
+            }
 
 
-           ClearResult();
+            ClearResult();
 
-           H264_DVR_TIME StartTime;
-           H264_DVR_TIME StopTime;
+            H264_DVR_TIME StartTime;
+            H264_DVR_TIME StopTime;
 
-           int nChannel = comboChannel.SelectedIndex;	//channel No.
-           int nFileType = comboRecordType.SelectedIndex;		//file type
-           if (nFileType >= 5)
-           {
-               nFileType += 5;
-           }
-             
-           StartTime.dwYear = beginDate.Value.Year;
-           StartTime.dwMonth = beginDate.Value.Month;
-           StartTime.dwDay = beginDate.Value.Day;
-           StartTime.dwHour = beginTime.Value.Hour;
-           StartTime.dwMinute = beginTime.Value.Minute;
-           StartTime.dwSecond = beginTime.Value.Second;
+            int nChannel = comboChannel.SelectedIndex;  //channel No.
+            int nFileType = comboRecordType.SelectedIndex;      //file type
+            if (nFileType >= 5)
+            {
+                nFileType += 5;
+            }
 
-           StopTime.dwYear = endDate.Value.Year;
-           StopTime.dwMonth = endDate.Value.Month;
-           StopTime.dwDay = endDate.Value.Day;
-           StopTime.dwHour =endDate.Value.Hour;
-           StopTime.dwMinute = endDate.Value.Minute;
-           StopTime.dwSecond = endDate.Value.Second;
-           H264_DVR_FILE_DATA[] szSend = new H264_DVR_FILE_DATA[64];
+            StartTime.dwYear = beginDate.Value.Year;
+            StartTime.dwMonth = beginDate.Value.Month;
+            StartTime.dwDay = beginDate.Value.Day;
+            StartTime.dwHour = beginTime.Value.Hour;
+            StartTime.dwMinute = beginTime.Value.Minute;
+            StartTime.dwSecond = beginTime.Value.Second;
 
-           ComboxItem item = (ComboxItem)comboDev.SelectedItem;
-         
-           if (item.Value != null)
-           {
-               DEV_INFO devInfo = (DEV_INFO)item.Value;
+            StopTime.dwYear = endDate.Value.Year;
+            StopTime.dwMonth = endDate.Value.Month;
+            StopTime.dwDay = endDate.Value.Day;
+            StopTime.dwHour = endDate.Value.Hour;
+            StopTime.dwMinute = endDate.Value.Minute;
+            StopTime.dwSecond = endDate.Value.Second;
+            H264_DVR_FILE_DATA[] szSend = new H264_DVR_FILE_DATA[64];
 
+            ComboxItem item = (ComboxItem)comboDev.SelectedItem;
 
-               int lLoginID = devInfo.lLoginID;
-               int nMaxLen = 100;
-               int waitTime = 4000;
-               int nNum = 0;
-               H264_DVR_FINDINFO searchInfo = new H264_DVR_FINDINFO();
-               searchInfo.startTime = StartTime;
-               searchInfo.endTime = StopTime;
-               searchInfo.nChannelN0 = nChannel;
-               searchInfo.nFileType = nFileType;
+            if (item.Value != null)
+            {
+                DEV_INFO devInfo = (DEV_INFO)item.Value;
 
 
-               IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(H264_DVR_FILE_DATA)) * 100);
+                int lLoginID = devInfo.lLoginID;
+                int nMaxLen = 100;
+                int waitTime = 4000;
+                int nNum = 0;
+                H264_DVR_FINDINFO searchInfo = new H264_DVR_FINDINFO();
+                searchInfo.startTime = StartTime;
+                searchInfo.endTime = StopTime;
+                searchInfo.nChannelN0 = nChannel;
+                searchInfo.nFileType = nFileType;
+
+
+                IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(H264_DVR_FILE_DATA)) * 100);
 
 
 
-               int nRet = XMSDK.H264_DVR_FindFile(lLoginID, ref searchInfo, ptr, nMaxLen, out nNum, waitTime);
-               m_nCurRecNum = nNum;
+                int nRet = XMSDK.H264_DVR_FindFile(lLoginID, ref searchInfo, ptr, nMaxLen, out nNum, waitTime);
+                m_nCurRecNum = nNum;
 
-               for (int index = 0; index < nNum; index++)
-               {
-                   unsafe
-                   {
-                       int* pDev = (int*)ptr.ToPointer();
-                       pDev += Marshal.SizeOf(typeof(H264_DVR_FILE_DATA)) * index / 4;
+                for (int index = 0; index < nNum; index++)
+                {
+                    unsafe
+                    {
+                        int* pDev = (int*)ptr.ToPointer();
+                        pDev += Marshal.SizeOf(typeof(H264_DVR_FILE_DATA)) * index / 4;
 
-                       IntPtr ptrTemp = new IntPtr(pDev);
-                       szSend[index] = (H264_DVR_FILE_DATA)Marshal.PtrToStructure(ptrTemp, typeof(H264_DVR_FILE_DATA));
-                    //   m_listFile[index] = szSend[index];
-                       
-                   }
+                        IntPtr ptrTemp = new IntPtr(pDev);
+                        szSend[index] = (H264_DVR_FILE_DATA)Marshal.PtrToStructure(ptrTemp, typeof(H264_DVR_FILE_DATA));
+                        //   m_listFile[index] = szSend[index];
 
-               }
-               m_listFile.Clear();
-               if ( nRet > 0 )
-               {
-                   if ( nNum > 0) 
-                   {
-                      
-                       if (m_nCurRecNum > m_listFile.Capacity)
-                       {
-                           m_listFile.Capacity = m_nCurRecNum;
-                       }
-                       
+                    }
 
-                       for (int i = 0; i < m_nCurRecNum; i++)
-                       {
-                           m_listFile.Add(szSend[i]);
-                       }
-                       m_nSearchInfo[m_nCurPage] = searchInfo;
-                       m_nCurPage = 1;
-                       m_nSearchInfo[m_nCurPage].nChannelN0 = nChannel;
-                       m_nSearchInfo[m_nCurPage].nFileType = nFileType;
-                       m_nSearchInfo[m_nCurPage].startTime.dwYear = szSend[m_nCurRecNum - 1].stEndTime.year;
-                       m_nSearchInfo[m_nCurPage].startTime.dwMonth = szSend[m_nCurRecNum - 1].stEndTime.month;
-                       m_nSearchInfo[m_nCurPage].startTime.dwDay = szSend[m_nCurRecNum - 1].stEndTime.day;
-                       m_nSearchInfo[m_nCurPage].startTime.dwHour = szSend[m_nCurRecNum - 1].stEndTime.hour;
-                       m_nSearchInfo[m_nCurPage].startTime.dwMinute = szSend[m_nCurRecNum - 1].stEndTime.minute;
-                       m_nSearchInfo[m_nCurPage].startTime.dwSecond = szSend[m_nCurRecNum - 1].stEndTime.second;
-                       m_nSearchInfo[m_nCurPage].endTime = searchInfo.endTime;
+                }
+                m_listFile.Clear();
+                if (nRet > 0)
+                {
+                    if (nNum > 0)
+                    {
 
-                       m_nGetPage++;
-                       
-                       if (nNum < PLAYBACK_MAX_FILE_NUM)
-                       {
-                           m_nTotalPage = m_nGetPage;
-                       }
+                        if (m_nCurRecNum > m_listFile.Capacity)
+                        {
+                            m_listFile.Capacity = m_nCurRecNum;
+                        }
 
-                       AddFileListInfo(m_nCurRecNum);//add list item
-                       SetPageBtnState(nNum);
-                   }
-                   else
-                   {
-                       MessageBox.Show("No File");
-                   }
-               }
-               else
-               {
-                   MessageBox.Show("SearchFail");
-               }
-           }
+
+                        for (int i = 0; i < m_nCurRecNum; i++)
+                        {
+                            m_listFile.Add(szSend[i]);
+                        }
+                        m_nSearchInfo[m_nCurPage] = searchInfo;
+                        m_nCurPage = 1;
+                        m_nSearchInfo[m_nCurPage].nChannelN0 = nChannel;
+                        m_nSearchInfo[m_nCurPage].nFileType = nFileType;
+                        m_nSearchInfo[m_nCurPage].startTime.dwYear = szSend[m_nCurRecNum - 1].stEndTime.year;
+                        m_nSearchInfo[m_nCurPage].startTime.dwMonth = szSend[m_nCurRecNum - 1].stEndTime.month;
+                        m_nSearchInfo[m_nCurPage].startTime.dwDay = szSend[m_nCurRecNum - 1].stEndTime.day;
+                        m_nSearchInfo[m_nCurPage].startTime.dwHour = szSend[m_nCurRecNum - 1].stEndTime.hour;
+                        m_nSearchInfo[m_nCurPage].startTime.dwMinute = szSend[m_nCurRecNum - 1].stEndTime.minute;
+                        m_nSearchInfo[m_nCurPage].startTime.dwSecond = szSend[m_nCurRecNum - 1].stEndTime.second;
+                        m_nSearchInfo[m_nCurPage].endTime = searchInfo.endTime;
+
+                        m_nGetPage++;
+
+                        if (nNum < PLAYBACK_MAX_FILE_NUM)
+                        {
+                            m_nTotalPage = m_nGetPage;
+                        }
+
+                        AddFileListInfo(m_nCurRecNum);//add list item
+                        SetPageBtnState(nNum);
+                    }
+                    else
+                    {
+                        MessageBox.Show("No File");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("SearchFail");
+                }
+            }
 
         }
         private void AddFileListInfo(int iNum)
         {
-	        if ( m_bDownloadByTime )
-	        {
-		        iNum = 1;
-		        m_nCurPage=1;
-	            m_nTotalPage=1;
-	        }
+            if (m_bDownloadByTime)
+            {
+                iNum = 1;
+                m_nCurPage = 1;
+                m_nTotalPage = 1;
+            }
             int count = listFile.Items.Count;
 
-	        for ( int i = 0; i < iNum ; i++)
-	        {
-		     
-        		string tempstring = string.Format("{0}", i + 1);
+            for (int i = 0; i < iNum; i++)
+            {
+
+                string tempstring = string.Format("{0}", i + 1);
 
 
                 ListViewItem.ListViewSubItem subitem1 = new ListViewItem.ListViewSubItem();
                 subitem1.Text = tempstring;
                 subitem1.Name = "No.";
 
-		        string strBtme,strEtime;
-		        if ( m_bDownloadByTime )
-		        {
+                string strBtme, strEtime;
+                if (m_bDownloadByTime)
+                {
                     strBtme = string.Format("{0}-{1}-{2}-{3}:{4}:{5}", beginDate.Value.Year,
                         beginDate.Value.Month,
                         beginDate.Value.Day,
@@ -544,18 +525,19 @@ namespace ClientDemo
                         beginTime.Value.Minute,
                         beginTime.Value.Second);
 
-                    strEtime = string.Format("{0}-{1}-{2}-{3}:{4}:{5}", endDate.Value.Year, 
-				        endDate.Value.Month,
+                    strEtime = string.Format("{0}-{1}-{2}-{3}:{4}:{5}", endDate.Value.Year,
+                        endDate.Value.Month,
                         endDate.Value.Day,
-				        endTime.Value.Hour,
+                        endTime.Value.Hour,
                         endTime.Value.Minute,
                         endTime.Value.Second);
-        			
-			        tempstring = string.Format("{0}-{1}", strBtme, strEtime);
-		        }else
-		        {
-                    strBtme = string.Format("{0}-{1}-{2}-{3}:{4}:{5}", m_listFile[i].stBeginTime.year, 
-				        m_listFile[i].stBeginTime.month,
+
+                    tempstring = string.Format("{0}-{1}", strBtme, strEtime);
+                }
+                else
+                {
+                    strBtme = string.Format("{0}-{1}-{2}-{3}:{4}:{5}", m_listFile[i].stBeginTime.year,
+                        m_listFile[i].stBeginTime.month,
                         m_listFile[i].stBeginTime.day,
                         m_listFile[i].stBeginTime.hour,
                         m_listFile[i].stBeginTime.minute,
@@ -570,22 +552,22 @@ namespace ClientDemo
                         m_listFile[i].stEndTime.second);
 
                     tempstring = string.Format("{0}-{1}({2}KB)", strBtme, strEtime, m_listFile[i].size);
-		        }
+                }
 
 
-        		ListViewItem item = new ListViewItem();
-               
+                ListViewItem item = new ListViewItem();
+
                 ListViewItem.ListViewSubItem subitem2 = new ListViewItem.ListViewSubItem();
                 subitem2.Text = tempstring;
                 subitem2.Name = "FileTime";
 
-                item.SubItems.Insert(0,subitem1);
-                item.SubItems.Insert(1,subitem2);
+                item.SubItems.Insert(0, subitem1);
+                item.SubItems.Insert(1, subitem2);
                 item.Tag = m_listFile[i];
 
-                listFile.Items.Insert(count + i, item); 
- 
-	        }
+                listFile.Items.Insert(count + i, item);
+
+            }
         }
 
         private void SetPageBtnState(int num)
@@ -598,16 +580,16 @@ namespace ClientDemo
             {
                 btnNextPage.Enabled = true;
             }
-	        
-	        if ( m_nCurPage > 1 )
-	        {
+
+            if (m_nCurPage > 1)
+            {
                 btnPrePage.Enabled = true;
-	        }
-	        else
-	        {
-		        btnPrePage.Enabled = false;
-	        }
-            
+            }
+            else
+            {
+                btnPrePage.Enabled = false;
+            }
+
         }
 
         private void btnDownload_Click(object sender, EventArgs e)
@@ -618,10 +600,10 @@ namespace ClientDemo
                 MessageBox.Show("SelectDevice!");
                 return;
             }
-           
-            
 
-             if (listFile.FocusedItem==null)
+
+
+            if (listFile.FocusedItem == null)
             {
                 MessageBox.Show("Select a File !");
                 return;
@@ -657,18 +639,18 @@ namespace ClientDemo
 
             m_ListFindNum = m_ListFindNum - 1;
 
-           // if (GetNextPageInfo( m_listFindInfo[--m_ListFindNum]) > 0 )
+            // if (GetNextPageInfo( m_listFindInfo[--m_ListFindNum]) > 0 )
             {
                 H264_DVR_FILE_DATA[] szSend = new H264_DVR_FILE_DATA[100];
 
                 int nNum = 0;
 
-               // H264_DVR_FINDINFO findinfo = m_listFindInfo[m_ListFindNum];
+                // H264_DVR_FINDINFO findinfo = m_listFindInfo[m_ListFindNum];
 
                 IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(H264_DVR_FILE_DATA)) * 100);
 
-                int nRet = XMSDK.H264_DVR_FindFile(m_lLoginID, ref m_nSearchInfo[m_nCurPage-1], ptr, 100, out nNum, 5000);
-                
+                int nRet = XMSDK.H264_DVR_FindFile(m_lLoginID, ref m_nSearchInfo[m_nCurPage - 1], ptr, 100, out nNum, 5000);
+
                 for (int index = 0; index < nNum; index++)
                 {
                     unsafe
@@ -678,12 +660,12 @@ namespace ClientDemo
 
                         IntPtr ptrTemp = new IntPtr(pDev);
                         szSend[index] = (H264_DVR_FILE_DATA)Marshal.PtrToStructure(ptrTemp, typeof(H264_DVR_FILE_DATA));
-                       // m_listFile[index] = szSend[index];
+                        // m_listFile[index] = szSend[index];
                     }
 
                 }
                 m_listFile.Clear();
-               
+
                 m_nCurRecNum = nNum;
 
                 if (nRet > 0 && nNum > 0) //处理没有录象的情况
@@ -692,18 +674,18 @@ namespace ClientDemo
                     {
                         m_listFile.Capacity = m_nCurRecNum;
                     }
-                    
+
 
                     for (int i = 0; i < m_nCurRecNum; i++)
                     {
                         m_listFile.Add(szSend[i]);
                     }
-                   
+
                     m_ListFindNum++;
                 }
                 else
                 {
-                   
+
                 }
                 AddFileListInfo(m_nCurRecNum);
                 SetPageBtnState(nNum);
@@ -711,14 +693,14 @@ namespace ClientDemo
         }
         private int GetNextPageInfo(H264_DVR_FINDINFO searchInfo)
         {
-	        H264_DVR_FILE_DATA[] szSend = new H264_DVR_FILE_DATA[100];
-	        int nNum=0;
+            H264_DVR_FILE_DATA[] szSend = new H264_DVR_FILE_DATA[100];
+            int nNum = 0;
 
 
             IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(H264_DVR_FILE_DATA)) * 100);
 
 
-            int ret = XMSDK.H264_DVR_FindFile(m_lLoginID, ref searchInfo, ptr ,100, out nNum, 5000);
+            int ret = XMSDK.H264_DVR_FindFile(m_lLoginID, ref searchInfo, ptr, 100, out nNum, 5000);
 
             //for (int index = 0; index < 100; index++)
             //{
@@ -732,9 +714,9 @@ namespace ClientDemo
             //    }
 
             //}
-	       
-        	
-	        return ret;
+
+
+            return ret;
         }
 
         private void btnNextPage_Click(object sender, EventArgs e)
@@ -775,12 +757,12 @@ namespace ClientDemo
 
                 if (nRet > 0 && nNum > 0)  //处理没有录象的情况
                 {
-                   
+
                     if (m_nCurRecNum > m_listFile.Capacity)
                     {
                         m_listFile.Capacity = m_nCurRecNum;
                     }
-                    
+
 
                     for (int i = 0; i < m_nCurRecNum; i++)
                     {
@@ -802,8 +784,8 @@ namespace ClientDemo
                     {
                         m_nTotalPage = m_nGetPage;
                     }
-                    
-                   
+
+
 
                     AddFileListInfo(m_nCurRecNum);
 
@@ -811,83 +793,83 @@ namespace ClientDemo
                 }
                 else
                 {
-                   
+
                 }
             }
         }
-        
-        private void DownloadByName() 
+
+        private void DownloadByName()
         {
 
             if (m_DownLoadFileHandle > 0)
-	        {
+            {
                 timerDownload.Stop();
                 XMSDK.H264_DVR_StopGetFile(m_DownLoadFileHandle);
                 m_DownLoadFileHandle = 0;
-		        progressBarDownloadPos.Value = 0;
-        		
-		        btnDownload.Text = "Download";
-        		
-		        return;
-	        }
-        	
-	        string csFileName;
-        	
+                progressBarDownloadPos.Value = 0;
+
+                btnDownload.Text = "Download";
+
+                return;
+            }
+
+            string csFileName;
+
             //inCount;
             //if ( nSelected < 0 )
             //{
             //    MessageBox.Show("SelectFile !");
             //    return;
             //}
-        	
 
-	        H264_DVR_FILE_DATA FileInfo = (H264_DVR_FILE_DATA)listFile.FocusedItem.Tag;
-	      
-        	
-	        string strSaveName;
-	        //strSaveName.Format("c:\\record\\record.h264");
-	        int nSelectedIndex = comboDev.SelectedIndex;
-	        if ( nSelectedIndex < 0)
-	        {
-		        MessageBox.Show("SelectDevice !");
-		        return;
-	        }
+
+            H264_DVR_FILE_DATA FileInfo = (H264_DVR_FILE_DATA)listFile.FocusedItem.Tag;
+
+
+            string strSaveName;
+            //strSaveName.Format("c:\\record\\record.h264");
+            int nSelectedIndex = comboDev.SelectedIndex;
+            if (nSelectedIndex < 0)
+            {
+                MessageBox.Show("SelectDevice !");
+                return;
+            }
             DEV_INFO DevTemp = (DEV_INFO)((ComboxItem)comboDev.SelectedItem).Value;
-        	
-	        string strInitDir;
+
+            string strInitDir;
 
             strInitDir = Application.StartupPath;
-	        if (strInitDir.EndsWith("\\")) 
-	        {
-		        strInitDir += "Download";
-	        }
-	        else
-	        {
-		        strInitDir += "\\Download";
-	        }
+            if (strInitDir.EndsWith("\\"))
+            {
+                strInitDir += "Download";
+            }
+            else
+            {
+                strInitDir += "\\Download";
+            }
 
             DirectoryInfo dir = new DirectoryInfo(strInitDir);
 
-	        //if ( dir.Attributes ) 
-	        {
-		        dir.Create();
-	        }
-        	
-	        string strFileTpye = "h264";
+            //if ( dir.Attributes ) 
+            {
+                dir.Create();
+            }
+
+            string strFileTpye = "h264";
             string strFileName = FileInfo.sFileName;
-	        if ( strFileName.EndsWith(".h264") )
-	        {
-		        strFileTpye = "h264";
-	        }
-	        else
-	        {
-		        strFileTpye = "jpg";
-	        }
-	        strFileName = string.Format("{0}_{1}_{2}-{3}_{4}{5}{6}{7}.{8}",
-                DevTemp.szDevName, FileInfo.ch + 1, 
-		        FileInfo.stBeginTime.year, FileInfo.stBeginTime.month,
-		        FileInfo.stBeginTime.day, FileInfo.stBeginTime.hour,
-		        FileInfo.stBeginTime.minute, FileInfo.stBeginTime.second, strFileTpye);
+            if (strFileName.EndsWith(".h264"))
+            {
+                strFileTpye = "h264";
+            }
+            else
+            {
+                strFileTpye = "jpg";
+            }
+            strFileName = string.Format("{0}_{1}_{2}-{3}_{4}{5}{6}{7}.{8}",
+                DevTemp.szDevName, FileInfo.ch + 1,
+                FileInfo.stBeginTime.year, FileInfo.stBeginTime.month,
+                FileInfo.stBeginTime.day, FileInfo.stBeginTime.hour,
+                FileInfo.stBeginTime.minute, FileInfo.stBeginTime.second, strFileTpye);
 
             SaveFileDialog dlg = new SaveFileDialog();
             dlg.AddExtension = true;
@@ -900,96 +882,96 @@ namespace ClientDemo
             int count = listFile.SelectedItems[0].Index;
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                
-		        strSaveName = dlg.FileName;
-		        //m_lSaveHandle = H264_DVR_GetFileByName(m_lLoginID, pstrFileInfo,strSaveName.GetBuffer(0),SDKDownLoadPosCallback,(DWORD)this);
+
+                strSaveName = dlg.FileName;
+                //m_lSaveHandle = H264_DVR_GetFileByName(m_lLoginID, pstrFileInfo,strSaveName.GetBuffer(0),SDKDownLoadPosCallback,(DWORD)this);
                 m_DownLoadFileHandle = XMSDK.H264_DVR_GetFileByName(m_lLoginID, ref FileInfo, strSaveName, null, 0, null);
                 if (m_DownLoadFileHandle >= 0)
-		        {
-			        progressBarDownloadPos.Value = 0;
-			        btnDownload.Text = "Stop";
-			        //update the progress control
+                {
+                    progressBarDownloadPos.Value = 0;
+                    btnDownload.Text = "Stop";
+                    //update the progress control
                     //SetTimer(1,0,NULL);
-		        }
-		        else
-		        {
-		            string sTemp =  string.Format("dowload fail ERROR = {0}",XMSDK.H264_DVR_GetLastError());
+                }
+                else
+                {
+                    string sTemp = string.Format("dowload fail ERROR = {0}", XMSDK.H264_DVR_GetLastError());
                     MessageBox.Show(sTemp);
-		        }
+                }
             }
         }
 
-        private void DownloadByTime() 
+        private void DownloadByTime()
         {
 
             if (m_DownLoadFileHandle > 0)
-	        {
+            {
                 timerDownload.Stop();
                 XMSDK.H264_DVR_StopGetFile(m_DownLoadFileHandle);
                 m_DownLoadFileHandle = 0;
                 progressBarDownloadPos.Value = 0;
-        		
-		        btnDownload.Text = "Download";
-        		
-		        return;
-	        }
-        	
-	        string strSaveName = "";
-	        //strSaveName.Format("c:\\record");
-	        strSaveName = BrowseForFolder(this.Handle) ;
-        	
-	        if ( strSaveName == "")  //未选择路径时退出
-	        {
-		        return;
-	        }
 
-	        H264_DVR_FINDINFO info = new H264_DVR_FINDINFO();
-        
-	        info.nChannelN0 = comboChannel.SelectedIndex;	//channel No.
-	        info.nFileType = comboRecordType.SelectedIndex;		//file type
-	        info.startTime.dwYear = beginDate.Value.Year;
+                btnDownload.Text = "Download";
+
+                return;
+            }
+
+            string strSaveName = "";
+            //strSaveName.Format("c:\\record");
+            strSaveName = BrowseForFolder(this.Handle);
+
+            if (strSaveName == "")  //未选择路径时退出
+            {
+                return;
+            }
+
+            H264_DVR_FINDINFO info = new H264_DVR_FINDINFO();
+
+            info.nChannelN0 = comboChannel.SelectedIndex;   //channel No.
+            info.nFileType = comboRecordType.SelectedIndex;     //file type
+            info.startTime.dwYear = beginDate.Value.Year;
             info.startTime.dwMonth = beginDate.Value.Month;
             info.startTime.dwDay = beginDate.Value.Day;
-	        info.startTime.dwHour = beginTime.Value.Hour;
+            info.startTime.dwHour = beginTime.Value.Hour;
             info.startTime.dwMinute = beginTime.Value.Minute;
             info.startTime.dwSecond = beginTime.Value.Second;
-	        info.endTime.dwYear = endDate.Value.Year;
+            info.endTime.dwYear = endDate.Value.Year;
             info.endTime.dwMonth = endDate.Value.Month;
-	        info.endTime.dwDay = endDate.Value.Day;
-	        info.endTime.dwHour = endTime.Value.Hour;
+            info.endTime.dwDay = endDate.Value.Day;
+            info.endTime.dwHour = endTime.Value.Hour;
             info.endTime.dwMinute = endTime.Value.Minute;
             info.endTime.dwSecond = endTime.Value.Second;
-	        int nRecordFileType = comboRecordType.SelectedIndex;
+            int nRecordFileType = comboRecordType.SelectedIndex;
             info.nFileType = (nRecordFileType <= (int)PlayBackFileType.SDK_RECORD_MANUAL) ? nRecordFileType : ((int)PlayBackFileType.SDK_PIC_ALL + nRecordFileType - (int)PlayBackFileType.SDK_RECORD_MANUAL - 1);
 
             m_DownLoadFileHandle = XMSDK.H264_DVR_GetFileByTime(m_lLoginID, ref info, strSaveName, false, null, 0, null);
             if (m_DownLoadFileHandle > 0)
-	        {
-              progressBarDownloadPos.Value = 0;
-        		
-		      btnDownload.Text = "Stop";
-        		
-		        //update the progress control
-              timerDownload.Start();
-	        }
-	        else
-	        {
-		        string sTemp;
-		        sTemp = string.Format("dowload fail ERROR = {0}",XMSDK.H264_DVR_GetLastError());
+            {
+                progressBarDownloadPos.Value = 0;
+
+                btnDownload.Text = "Stop";
+
+                //update the progress control
+                timerDownload.Start();
+            }
+            else
+            {
+                string sTemp;
+                sTemp = string.Format("dowload fail ERROR = {0}", XMSDK.H264_DVR_GetLastError());
                 MessageBox.Show(sTemp);
-	        }
+            }
         }
 
         private string BrowseForFolder(IntPtr ptrWnd)
         {
             string strTitle = "Select a folder";
             string strDisplayName = "";
-            string strPath  = "";
+            string strPath = "";
 
             FolderBrowserDialog folderDlg = new FolderBrowserDialog();
             folderDlg.ShowNewFolderButton = true;
             folderDlg.ShowDialog();
-            
+
             return folderDlg.SelectedPath;
         }
         private void comboChannel_SelectedIndexChanged(object sender, EventArgs e)
@@ -1016,7 +998,7 @@ namespace ClientDemo
             }
             trackBarNetPlayPos.Value = 0;
             m_bOpenAudio = false;
-            m_bPauseNetPlay = false;    
+            m_bPauseNetPlay = false;
         }
 
         private void btnNetPlay_Click(object sender, EventArgs e)
@@ -1040,9 +1022,9 @@ namespace ClientDemo
                 PlayByName();
             }
         }
-        private void  PlayByTime() 
+        private void PlayByTime()
         {
-           
+
             if (m_nNetPlayHandle >= 0)
             {
                 XMSDK.H264_DVR_StopPlayBack(m_nNetPlayHandle);
@@ -1050,18 +1032,18 @@ namespace ClientDemo
             }
             trackBarNetPlayPos.Value = 0;
             m_bOpenAudio = false;
-            m_bPauseNetPlay = false;  
+            m_bPauseNetPlay = false;
 
 
             m_nFastTypeNet = 0;
             m_nSlowTypeNet = 0;
 
-	        if(m_nNetPlayHandle == 0)
-	        {
-		        H264_DVR_FINDINFO info = new H264_DVR_FINDINFO();
-        		
-		        info.nChannelN0 = comboChannel.SelectedIndex;	//channel No.
-		        info.nFileType = comboRecordType.SelectedIndex;		//file type
+            if (m_nNetPlayHandle == 0)
+            {
+                H264_DVR_FINDINFO info = new H264_DVR_FINDINFO();
+
+                info.nChannelN0 = comboChannel.SelectedIndex;   //channel No.
+                info.nFileType = comboRecordType.SelectedIndex;		//file type
                 info.startTime.dwYear = beginDate.Value.Year;
                 info.startTime.dwMonth = beginDate.Value.Month;
                 info.startTime.dwDay = beginDate.Value.Day;
@@ -1069,7 +1051,7 @@ namespace ClientDemo
                 info.startTime.dwHour = beginTime.Value.Hour;
                 info.startTime.dwMinute = beginTime.Value.Minute;
                 info.startTime.dwSecond = beginTime.Value.Second;
-		        info.endTime.dwYear = endDate.Value.Year;
+                info.endTime.dwYear = endDate.Value.Year;
                 info.endTime.dwMonth = endDate.Value.Month;
                 info.endTime.dwDay = endDate.Value.Day;
                 info.endTime.dwHour = endTime.Value.Hour;
@@ -1090,25 +1072,25 @@ namespace ClientDemo
                     return;
                 }
                 timerNetPlayBack.Start();
-	        }
-	        else
-	        {
+            }
+            else
+            {
 
                 if (m_bPauseNetPlay)
-		        {
-			        XMSDK.H264_DVR_PlayBackControl(m_nNetPlayHandle, (int)PlayBackAction.SDK_PLAY_BACK_CONTINUE, 0 );
+                {
+                    XMSDK.H264_DVR_PlayBackControl(m_nNetPlayHandle, (int)PlayBackAction.SDK_PLAY_BACK_CONTINUE, 0);
                     m_bPauseNetPlay = !m_bPauseNetPlay;
-		        }
+                }
                 XMSDK.H264_DVR_PlayBackControl(m_nNetPlayHandle, (int)PlayBackAction.SDK_PLAY_BACK_FAST, 0);
                 m_nFastTypeNet = 0;
                 m_nSlowTypeNet = 0;
-	        }
+            }
         }
-        private void PlayByName() 
+        private void PlayByName()
         {
 
 
-            
+
             if (m_nNetPlayHandle >= 0)
             {
                 timerNetPlayBack.Enabled = false;
@@ -1116,49 +1098,49 @@ namespace ClientDemo
                 m_nNetPlayHandle = 0;
                 trackBarNetPlayPos.Value = 0;
                 m_bOpenAudio = false;
-                m_bPauseNetPlay = false;  
+                m_bPauseNetPlay = false;
             }
-          
+
 
             m_nFastTypeNet = 0;
             m_nSlowTypeNet = 0;
-	        if(m_nNetPlayHandle == 0)
-	        {
-		        string csFileName = "";
-        		
-		        int nSelected = listFile.SelectedItems.Count;
-		        if ( nSelected == 0 )
-		        {
-			        MessageBox.Show("SelectFile");
-			        return;
-		        }
-        		
-		        H264_DVR_FILE_DATA FileInfo = (H264_DVR_FILE_DATA)listFile.FocusedItem.Tag;
+            if (m_nNetPlayHandle == 0)
+            {
+                string csFileName = "";
+
+                int nSelected = listFile.SelectedItems.Count;
+                if (nSelected == 0)
+                {
+                    MessageBox.Show("SelectFile");
+                    return;
+                }
+
+                H264_DVR_FILE_DATA FileInfo = (H264_DVR_FILE_DATA)listFile.FocusedItem.Tag;
                 FileInfo.hWnd = (IntPtr)pictureBoxNetVideoWnd.Handle;
 
 
                 XMSDK.fDownLoadPosCallBack downloadCallBack = new XMSDK.fDownLoadPosCallBack(DownLoadPosCallback);
                 XMSDK.fRealDataCallBack_V2 netdatacallbackv2 = new XMSDK.fRealDataCallBack_V2(NetCallBack_V2);
 
-                m_nNetPlayHandle = XMSDK.H264_DVR_PlayBackByName_V2(m_lLoginID, ref  FileInfo, downloadCallBack, netdatacallbackv2, this.Handle.ToInt32());
-		        if(m_nNetPlayHandle <= 0 )
-		        {
-			        MessageBox.Show("Playback fail");
-			        return;
-		        }
+                m_nNetPlayHandle = XMSDK.H264_DVR_PlayBackByName_V2(m_lLoginID, ref FileInfo, downloadCallBack, netdatacallbackv2, this.Handle.ToInt32());
+                if (m_nNetPlayHandle <= 0)
+                {
+                    MessageBox.Show("Playback fail");
+                    return;
+                }
                 timerNetPlayBack.Start();
-	        }
-	        else
-	        {
+            }
+            else
+            {
                 if (m_bPauseNetPlay)
-		        {
-			        XMSDK.H264_DVR_PlayBackControl(m_nNetPlayHandle, (int)PlayBackAction.SDK_PLAY_BACK_CONTINUE, 0 );//暂停恢复正常		
+                {
+                    XMSDK.H264_DVR_PlayBackControl(m_nNetPlayHandle, (int)PlayBackAction.SDK_PLAY_BACK_CONTINUE, 0);//暂停恢复正常		
                     m_bPauseNetPlay = !m_bPauseNetPlay;
-		        }
+                }
                 XMSDK.H264_DVR_PlayBackControl(m_nNetPlayHandle, (int)PlayBackAction.SDK_PLAY_BACK_FAST, 0);	//快慢放恢复正常	
                 m_nFastTypeNet = 0;
                 m_nSlowTypeNet = 0;
-	        }
+            }
         }
 
         private void btnNetFast_Click(object sender, EventArgs e)
@@ -1192,7 +1174,7 @@ namespace ClientDemo
 
         private void PlayBackForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (m_nNetPlayHandle > 0 )
+            if (m_nNetPlayHandle > 0)
             {
                 XMSDK.H264_DVR_StopPlayBack(m_nNetPlayHandle);
                 m_nNetPlayHandle = -1;
@@ -1210,9 +1192,9 @@ namespace ClientDemo
         {
             listFile.Items.Clear();
             //comboChannel.Items.Clear();
-           // m_mapTemp.clear();
+            // m_mapTemp.clear();
             m_ListFindNum = 0;
-	        //m_pstrFileVector.clear();
+            //m_pstrFileVector.clear();
         }
 
         private void btnOpenAudio_Click(object sender, EventArgs e)
@@ -1232,7 +1214,7 @@ namespace ClientDemo
                 {
                     if (XMSDK.H264_DVR_CloseSound(m_nNetPlayHandle))
                     {
-                       btnOpenAudio.Text = "OpenAudio";
+                        btnOpenAudio.Text = "OpenAudio";
                         m_bOpenAudio = false;
                     }
                 }
@@ -1248,36 +1230,37 @@ namespace ClientDemo
             m_PreTime = System.DateTime.Now.Ticks;
             XMSDK.H264_DVR_SetPlayPos(m_nNetPlayHandle, m_SliderPos / (float)1000.0);
         }
-        
-         private void btn_Drag_Scroll(object sender, EventArgs e)
-         {
-             if (!m_bDownloadByTime)
-             {
-                 m_SliderPos = trackBarNetPlayPos.Value;
-                 m_PreTime = System.DateTime.Now.Ticks;
 
-                 timerNetPlayBack.Stop();
-                 XMSDK.H264_DVR_SetPlayPos(m_nNetPlayHandle, m_SliderPos / (float)1000.0);
-                 Thread.Sleep(200);
-                 timerNetPlayBack.Start();
-             }
-         }
+        private void btn_Drag_Scroll(object sender, EventArgs e)
+        {
+            if (!m_bDownloadByTime)
+            {
+                m_SliderPos = trackBarNetPlayPos.Value;
+                m_PreTime = System.DateTime.Now.Ticks;
+
+                timerNetPlayBack.Stop();
+                XMSDK.H264_DVR_SetPlayPos(m_nNetPlayHandle, m_SliderPos / (float)1000.0);
+                Thread.Sleep(200);
+                timerNetPlayBack.Start();
+            }
+        }
+
         private void SetSliderPos(int nplaypos)
         {
-	        if ( m_PreTime > 0 )
-	        {
+            if (m_PreTime > 0)
+            {
                 long nTime = System.DateTime.Now.Ticks;
                 if ((nTime - m_PreTime) >= 2000)
-		        {
-			        trackBarLocalPlayPos.Value= nplaypos * 1000;
-        			
-			        m_PreTime = 0;
-		        }
-	        }
-	        else
-	        {
-		         trackBarLocalPlayPos.Value = nplaypos * 1000;
-	        }
+                {
+                    trackBarLocalPlayPos.Value = nplaypos * 1000;
+
+                    m_PreTime = 0;
+                }
+            }
+            else
+            {
+                trackBarLocalPlayPos.Value = nplaypos * 1000;
+            }
         }
 
         private void comboDev_SelectedIndexChanged(object sender, EventArgs e)
@@ -1303,8 +1286,25 @@ namespace ClientDemo
 
         private void listFile_DoubleClick(object sender, EventArgs e)
         {
-            btnNetPlay_Click(null,null);
+            btnNetPlay_Click(null, null);
         }
 
+    }
+
+    public class ComboxItem
+    {
+        public string Text = "";
+
+        public object Value = new object();
+        public ComboxItem(string _Text, object _Value)
+        {
+            Text = _Text;
+            Value = _Value;
+        }
+
+        public override string ToString()
+        {
+            return Text;
+        }
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace ClientDemo
+﻿namespace DVR2Mjpeg
 {
-    partial class ClientDemo
+    partial class DVR2Mjpeg
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.btnTransparent = new System.Windows.Forms.Button();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.comboBoxCamCount = new System.Windows.Forms.ComboBox();
             this.btnPTZ = new System.Windows.Forms.Button();
             this.btncolor = new System.Windows.Forms.Button();
             this.btnplayback = new System.Windows.Forms.Button();
@@ -51,18 +51,19 @@
             // 
             // comboBox1
             // 
-            this.comboBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
+            this.comboBoxCamCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBoxCamCount.FormattingEnabled = true;
+            this.comboBoxCamCount.Items.AddRange(new object[] {
             "1",
             "4",
             "9",
-            "16"});
-            this.comboBox1.Location = new System.Drawing.Point(938, 617);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(103, 20);
-            this.comboBox1.TabIndex = 3;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            "16",
+            "32"});
+            this.comboBoxCamCount.Location = new System.Drawing.Point(938, 617);
+            this.comboBoxCamCount.Name = "comboBoxCamCount";
+            this.comboBoxCamCount.Size = new System.Drawing.Size(103, 20);
+            this.comboBoxCamCount.TabIndex = 3;
+            this.comboBoxCamCount.SelectedIndexChanged += new System.EventHandler(this.comboBoxCamCount_SelectedIndexChanged);
             // 
             // btnPTZ
             // 
@@ -141,16 +142,16 @@
             this.Controls.Add(this.btnplayback);
             this.Controls.Add(this.btncolor);
             this.Controls.Add(this.btnPTZ);
-            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.comboBoxCamCount);
             this.Controls.Add(this.btnTransparent);
             this.Name = "ClientDemo";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ClientDemo";
-            this.Load += new System.EventHandler(this.ClientDemo_Load);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.ClientDemo_Paint);
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ClientDemo_FormClosed);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ClientDemo_KeyUp);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ClientDemo_FormClosing);
+            this.Load += new System.EventHandler(this.DVR2Mjpeg_Load);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.DVR2Mjpeg_Paint);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DVR2Mjpeg_FormClosed);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.DVR2Mjpeg_KeyUp);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DVR2Mjpeg_FormClosing);
             this.ResumeLayout(false);
 
         }
@@ -158,7 +159,7 @@
         #endregion
 
         private System.Windows.Forms.Button btnTransparent;
-        public System.Windows.Forms.ComboBox comboBox1;
+        public System.Windows.Forms.ComboBox comboBoxCamCount;
         private System.Windows.Forms.Button btnPTZ;
         private System.Windows.Forms.Button btncolor;
         private System.Windows.Forms.Button btnplayback;
