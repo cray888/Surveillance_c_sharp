@@ -12,5 +12,6 @@
     <FallbackCulture>zh-CN</FallbackCulture>
     <VerifyUploadedFiles>false</VerifyUploadedFiles>
     <ErrorReportUrlHistory />
+    <ProjectView>ProjectFiles</ProjectView>
   </PropertyGroup>
 </Project>

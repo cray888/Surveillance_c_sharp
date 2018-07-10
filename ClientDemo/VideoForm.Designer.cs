@@ -34,7 +34,7 @@
             this.soundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.talkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.checkBoxSaveImage = new System.Windows.Forms.CheckBox();
             this.panelVideo = new System.Windows.Forms.Panel();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -78,14 +78,14 @@
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
             // 
-            // checkBox1
+            // checkBoxSaveImage
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(2, 1);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(15, 14);
-            this.checkBox1.TabIndex = 1;
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBoxSaveImage.AutoSize = true;
+            this.checkBoxSaveImage.Location = new System.Drawing.Point(2, 1);
+            this.checkBoxSaveImage.Name = "checkBoxSaveImage";
+            this.checkBoxSaveImage.Size = new System.Drawing.Size(15, 14);
+            this.checkBoxSaveImage.TabIndex = 1;
+            this.checkBoxSaveImage.UseVisualStyleBackColor = true;
             // 
             // panel1
             // 
@@ -104,7 +104,7 @@
             this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ContextMenuStrip = this.contextMenuStrip1;
             this.Controls.Add(this.panelVideo);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.checkBoxSaveImage);
             this.Name = "VideoForm";
             this.Size = new System.Drawing.Size(191, 203);
             this.Click += new System.EventHandler(this.VideoForm_Click);
@@ -121,7 +121,7 @@
         private System.Windows.Forms.ToolStripMenuItem catchPictureToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem soundToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem talkToolStripMenuItem;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox checkBoxSaveImage;
         private System.Windows.Forms.Panel panelVideo;
     }
 }

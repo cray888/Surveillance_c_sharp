@@ -15,10 +15,13 @@ namespace DVR2Mjpeg
         private String TAG = "DVR2Mjpeg";
 
         //HTTP server variable
-        private ImageStreamingServer _Server;
-        private int[] n_clientConnected = new int[32];
+        public ImageStreamingServer HttpServer;
+        private int[] clientConnectedPerChanel = new int[32];
 
         //DVR variable
+        public Boolean isConnected;
+        public int chanelOpened;
+
         public PTZForm m_formPTZ;
         public DevConfigForm m_formCfg;
         public VideoForm[] m_videoform = new VideoForm[32];
@@ -26,16 +29,15 @@ namespace DVR2Mjpeg
         public int m_nCurIndex = -1;
         public int m_nTotalWnd = 32;
         public DEV_INFO m_devInfo = new DEV_INFO();        
-        //public bool m_bArray;
         public static Dictionary<int , DEV_INFO> dictDevInfo = new Dictionary<int , DEV_INFO>();
         public static Dictionary<int, DEV_INFO> dictDiscontDev = new Dictionary<int, DEV_INFO>();
 
         private System.Timers.Timer timerDisconnect = new System.Timers.Timer(30000);
-        private System.Timers.ElapsedEventHandler reconnect;
+        private System.Timers.ElapsedEventHandler reconnectHandler;
         private XMSDK.fDisConnect disCallback;
         private XMSDK.fMessCallBack msgcallback;        
 
-        bool  MessCallBack(int  lLoginID, string pBuf,uint dwBufLen, IntPtr dwUser)
+        bool  MessCallBack(int lLoginID, string pBuf, uint dwBufLen, IntPtr dwUser)
         {
             DVR2Mjpeg form = new DVR2Mjpeg();
             Marshal.PtrToStructure(dwUser, form);
@@ -44,7 +46,10 @@ namespace DVR2Mjpeg
 
         void DisConnectBackCallFunc(int lLoginID, string pchDVRIP, int nDVRPort, IntPtr dwUser)
         {
-            Debug.WriteLine(TAG + ".DisConnectBackCallFunc(" + lLoginID.ToString() + "," + pchDVRIP + "," + nDVRPort.ToString() + ",dwUser" + ")");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".DisConnectBackCallFunc(" + lLoginID.ToString() + "," + pchDVRIP + "," + nDVRPort.ToString() + ",dwUser" + ")", "DVR INFO");
+
+            isConnected = false;
+            chanelOpened = 0;            
 
             for (int i = 0; i < 16; i++)
             {
@@ -67,7 +72,6 @@ namespace DVR2Mjpeg
 
             if ( dictDiscontDev.Count > 0 )
             {
-
                 timerDisconnect.Enabled = true;
                 timerDisconnect.Start();
             }
@@ -75,28 +79,35 @@ namespace DVR2Mjpeg
 
         public DVR2Mjpeg()
         {
-            Debug.WriteLine(TAG + ".DVR2Mjpeg()");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".DVR2Mjpeg()", "DVR INFO");
 
-            InitializeComponent();
+            //Init this form
+            InitializeComponent();            
 
+            //Init video forms
             for (int i = 0; i < 32; i++)
             {
                 m_videoform[i] = new VideoForm();
-                this.Controls.Add(this.m_videoform[i]);
+                Controls.Add(m_videoform[i]);
                 m_videoform[i].SetWndIndex(i);
-            }            
+            }
+
+            comboBoxCamCount.SelectedIndex = 4;
+
+            //Init dev forms
             devForm = new DevForm();
-            this.Controls.Add(devForm);
+            Controls.Add(devForm);
             devForm.Location = new Point(880, 10);
-            devForm.Anchor = (AnchorStyles.Top | AnchorStyles.Right);  
-            this.comboBoxCamCount.SelectedIndex = 4;
+            devForm.Anchor = (AnchorStyles.Top | AnchorStyles.Right);                        
 
             InitSDK();
+
             devForm.ReadXML();
 
-            reconnect = new System.Timers.ElapsedEventHandler(ReConnect);
-            GC.KeepAlive(reconnect);
-            timerDisconnect.Elapsed += new System.Timers.ElapsedEventHandler(reconnect); 
+            //Init reconnect handler
+            reconnectHandler = new System.Timers.ElapsedEventHandler(ReConnect);
+            GC.KeepAlive(reconnectHandler);
+            timerDisconnect.Elapsed += new System.Timers.ElapsedEventHandler(reconnectHandler); 
        
             ArrayWindow(32);
             SetActiveWnd(0);   
@@ -104,20 +115,23 @@ namespace DVR2Mjpeg
 
         public DVR2Mjpeg(bool noInit) { }
 
-        private void OpenChanel(int indexWind, int chanelID, bool savePicture)
+        private void OpenChanel(int indexWind, int chanelID, int stream, bool savePicture)
         {
-            Debug.WriteLine(TAG + ".OpenChanel(" + indexWind.ToString() + "," + chanelID + "," + savePicture.ToString() + ")");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".OpenChanel(" + indexWind.ToString() + "," + chanelID + "," + savePicture.ToString() + ")", "DVR INFO");
 
             TreeNode nodeDev = devForm.DevTree.Nodes[0];
             DEV_INFO devinfo = (DEV_INFO)nodeDev.Tag;
             CHANNEL_INFO chanInfo = (CHANNEL_INFO)nodeDev.Nodes[chanelID].Tag;
-            int iRealHandle = m_videoform[indexWind].ConnectRealPlay(ref devinfo, chanInfo.nChannelNo);
+            int iRealHandle = m_videoform[indexWind].ConnectRealPlay(ref devinfo, chanInfo.nChannelNo, stream);
             if (iRealHandle > 0)
             {
                 chanInfo.nWndIndex = indexWind;
                 nodeDev.Nodes[chanelID].Tag = chanInfo;
 
                 if (savePicture) m_videoform[indexWind].setSavePicture(savePicture);
+
+                chanelOpened++;
+                isConnected = true;
             }
         }
 
@@ -125,27 +139,29 @@ namespace DVR2Mjpeg
         {
             m_videoform[indexWind].Close();
             m_videoform[indexWind].setSavePicture(false);
+            chanelOpened--;
+            if (chanelOpened == 0) isConnected = false;
         }
 
         public int InitSDK()
         {
-            Debug.WriteLine(TAG + ".InitSDK()");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".InitSDK()", "DVR INFO");
 
             //initialize
             disCallback = new XMSDK.fDisConnect(DisConnectBackCallFunc);
             GC.KeepAlive(disCallback);
-            int bResult = XMSDK.H264_DVR_Init(disCallback, this.Handle);
+            int bResult = XMSDK.H264_DVR_Init(disCallback, Handle);
 
             msgcallback  = new XMSDK.fMessCallBack(MessCallBack);
-            XMSDK.H264_DVR_SetDVRMessCallBack(msgcallback, this.Handle);
-            XMSDK.H264_DVR_SetConnectTime(5000, 3);
+            XMSDK.H264_DVR_SetDVRMessCallBack(msgcallback, Handle);
+            XMSDK.H264_DVR_SetConnectTime(5000, 25);
 
             return bResult;
         }
 
         public bool ExitSDk()
         {
-            Debug.WriteLine(TAG + ".ExitSDk()");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ExitSDk()", "DVR INFO");
 
             return XMSDK.H264_DVR_Cleanup();
         }
@@ -168,7 +184,6 @@ namespace DVR2Mjpeg
             }
             
             int nNull = 3;
-            int nCount;
 
             switch (iNumber)
             {
@@ -248,7 +263,6 @@ namespace DVR2Mjpeg
                     }
                     break;
                 case 32:
-                    nCount = 6;
                     for (i = 0; i < 6; i++)
                     {
                         m_videoform[i].SetBounds(
@@ -393,7 +407,7 @@ namespace DVR2Mjpeg
 
         public int Connect(ref DEV_INFO pDev, int nChannel, int nWndIndex)
         {
-            Debug.WriteLine(TAG + ".Connect(" + pDev.szDevName + "," + nChannel.ToString() + "," + nWndIndex.ToString() + ")");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".Connect(" + pDev.szDevName + "," + nChannel.ToString() + "," + nWndIndex.ToString() + ")", "DVR INFO");
 
             int nRet = 0;
 
@@ -421,6 +435,8 @@ namespace DVR2Mjpeg
                 pDev.lLoginID = lLogin;
                 XMSDK.H264_DVR_SetupAlarmChan(lLogin);
             }
+
+            //isConnected = true;
 
             int nWnd = m_nCurIndex;
             if (nWndIndex >= 0)
@@ -499,7 +515,7 @@ namespace DVR2Mjpeg
 
         public void ReConnect(object source, System.Timers.ElapsedEventArgs e)
         {
-            Debug.WriteLine(TAG + ".ReConnect(source,e)");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ReConnect(source,e)", "DVR INFO");
 
             Dictionary<int, DEV_INFO> dictDiscontDevCopy = new Dictionary<int, DEV_INFO>(dictDiscontDev);
             foreach (DEV_INFO devinfo in dictDiscontDevCopy.Values)
@@ -567,12 +583,22 @@ namespace DVR2Mjpeg
                                     {
                                         BeginInvoke((MethodInvoker)(() =>
                                         {
-                                            clientForm.m_videoform[chInfo.nWndIndex].ConnectRealPlay(ref devAdd, chInfo.nChannelNo);
+                                            int iRealHandle = clientForm.m_videoform[chInfo.nWndIndex].ConnectRealPlay(ref devAdd, chInfo.nChannelNo);
+                                            if (iRealHandle > 0)
+                                            {
+                                                isConnected = true;
+                                                chanelOpened++;
+                                            }
                                         }));
                                     }
                                     else
                                     {
-                                        clientForm.m_videoform[chInfo.nWndIndex].ConnectRealPlay(ref devAdd, chInfo.nChannelNo);                                        
+                                        int iRealHandle = clientForm.m_videoform[chInfo.nWndIndex].ConnectRealPlay(ref devAdd, chInfo.nChannelNo);  
+                                        if (iRealHandle > 0)
+                                        {
+                                            isConnected = true;
+                                            chanelOpened++;
+                                        }
                                     }
                                     Thread.Sleep(100);
                                 }
@@ -678,8 +704,8 @@ namespace DVR2Mjpeg
         private void DVR2Mjpeg_Load(object sender, EventArgs e)
         {
             OpenCams();
-            _Server = new ImageStreamingServer();
-            _Server.Start(8080, this);
+            HttpServer = new ImageStreamingServer();
+            HttpServer.Start(8080, this);
         }
 
         private void OpenCams()
@@ -690,17 +716,21 @@ namespace DVR2Mjpeg
             OpenChanel(24, 24, true);*/
         }
 
+        //////////////////////////////////////////////
+        //Callback 
+        //////////////////////////////////////////////
         public void OnClientConnect(int chanel)
         {
             chanel--;
 
-            n_clientConnected[chanel]++;
+            clientConnectedPerChanel[chanel]++;
 
-            if (n_clientConnected[chanel] == 1)
+            if (clientConnectedPerChanel[chanel] == 1)
             {
-                if (this.InvokeRequired)
-                    this.BeginInvoke((MethodInvoker)(() => OpenChanel(chanel, chanel, true)));
-                else OpenChanel(chanel, chanel, true);
+                if (InvokeRequired)
+                    BeginInvoke((MethodInvoker)(() => OpenChanel(chanel, chanel, 0, true)));
+                else
+                    OpenChanel(chanel, chanel, 0, true);
 
                 Thread.Sleep(1000);
             }
@@ -710,13 +740,14 @@ namespace DVR2Mjpeg
         {
             chanel--;
 
-            n_clientConnected[chanel]--;
+            clientConnectedPerChanel[chanel]--;
 
-            if (n_clientConnected[chanel] == 0)
+            if (clientConnectedPerChanel[chanel] == 0)
             {
                 if (InvokeRequired)
                     BeginInvoke((MethodInvoker)(() => CloseChanel(chanel)));
-                else CloseChanel(chanel);
+                else
+                    CloseChanel(chanel);
             }
         }
 
@@ -724,18 +755,18 @@ namespace DVR2Mjpeg
         {
             chanel--;
 
-            n_clientConnected[chanel]++;
-            if (n_clientConnected[chanel] == 1)
+            clientConnectedPerChanel[chanel]++;
+            if (clientConnectedPerChanel[chanel] == 1)
             {
                 if (this.InvokeRequired)
-                    this.BeginInvoke((MethodInvoker)(() => OpenChanel(chanel, chanel, true)));
-                else OpenChanel(chanel, chanel, true);
+                    this.BeginInvoke((MethodInvoker)(() => OpenChanel(chanel, chanel, 0, true)));
+                else OpenChanel(chanel, chanel, 0, true);
             }
 
             Thread.Sleep(1000);
 
-            n_clientConnected[chanel]--;
-            if (n_clientConnected[chanel] == 0)
+            clientConnectedPerChanel[chanel]--;
+            if (clientConnectedPerChanel[chanel] == 0)
             {
                 if (InvokeRequired)
                     BeginInvoke((MethodInvoker)(() => CloseChanel(chanel)));

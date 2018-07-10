@@ -28,9 +28,11 @@ namespace DVR2Mjpeg
 	    public int m_iChannel; //play channel
         public int m_iTalkhandle;
 
+        public bool saveImageIsStarting = false;
+
         public VideoForm()
         {
-            Debug.WriteLine(TAG + ".VideoForm()");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".VideoForm()", "DVR INFO");
 
             InitializeComponent();
             m_tTimer.Elapsed += M_tTimer_Elapsed;
@@ -40,18 +42,18 @@ namespace DVR2Mjpeg
 
         public void SetWndIndex(int nIndex)
 	    {
-            Debug.WriteLine(TAG + ".SetWndIndex(" + nIndex.ToString() + ")", "info");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".SetWndIndex(" + nIndex.ToString() + ")", "DVR INFO");
             m_nIndex = nIndex;
 	    }
 
-	    public int ConnectRealPlay( ref DEV_INFO pDev, int nChannel)
+	    public int ConnectRealPlay( ref DEV_INFO pDev, int nChannel, int nStream = 1)
         {
-            Debug.WriteLine(TAG + ".ConnectRealPlay(" + pDev.szDevName + "," + nChannel.ToString() + ")");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ConnectRealPlay(" + pDev.szDevName + "," + nChannel.ToString() + ")", "DVR INFO");
 
             if (m_iPlayhandle != -1)
 	        {
 
-                if (0 != XMSDK.H264_DVR_StopRealPlay(m_iPlayhandle, (uint)this.panelVideo.Handle))
+                if (0 != XMSDK.H264_DVR_StopRealPlay(m_iPlayhandle, (uint)panelVideo.Handle))
 		        {
 
 		        }
@@ -60,13 +62,13 @@ namespace DVR2Mjpeg
 			        OnCloseSound();
 		        }
 	        }
-
-	        H264_DVR_CLIENTINFO playstru = new H264_DVR_CLIENTINFO();
+            
+            H264_DVR_CLIENTINFO playstru = new H264_DVR_CLIENTINFO();
 
 	        playstru.nChannel = nChannel;
-	        playstru.nStream = 1;
+	        playstru.nStream = nStream;
 	        playstru.nMode = 0;
-            playstru.hWnd=this.panelVideo.Handle;
+            playstru.hWnd= panelVideo.Handle;
             /*if (InvokeRequired)
                 BeginInvoke((MethodInvoker)(() => playstru.hWnd = this.panelVideo.Handle));
             else playstru.hWnd = this.panelVideo.Handle;*/
@@ -74,9 +76,9 @@ namespace DVR2Mjpeg
 	        if(m_iPlayhandle <= 0 )
 	        {
                 Int32 dwErr = XMSDK.H264_DVR_GetLastError();
-                    StringBuilder sTemp = new StringBuilder("");
-			        sTemp.AppendFormat("access {0} channel{1} fail, dwErr = {2}",pDev.szDevName,nChannel, dwErr);
-			        MessageBox.Show(sTemp.ToString());
+                    //StringBuilder sTemp = new StringBuilder("");
+			        //sTemp.AppendFormat("access {0} channel{1} fail, dwErr = {2}",pDev.szDevName,nChannel, dwErr);
+			        //MessageBox.Show(sTemp.ToString());
 	        }
 	        else
 	        {
@@ -243,7 +245,7 @@ namespace DVR2Mjpeg
 
         private void M_tTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (checkBox1.Checked && !m_bSaveImageStart)
+            if (checkBoxSaveImage.Checked && !m_bSaveImageStart)
             {
                 m_bSaveImageStart = true;
                 catchPictureToolStripMenuItem_Click(null, null);
@@ -300,10 +302,20 @@ namespace DVR2Mjpeg
 
         private void catchPictureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if ( m_nIndex > -1 && m_iPlayhandle > 0)
+            /*if (InvokeRequired)
+                BeginInvoke((MethodInvoker)(() =>
+                {
+                    IntPtr videoHandle = panelVideo.Handle;
+                    Bitmap b = new Bitmap(panelVideo.Width, panelVideo.Height); ;
+                    panelVideo.DrawToBitmap(b, new Rectangle(0, 0, b.Width, b.Height));
+                    b.Save(@"Z:\123.bmp");
+                }));*/
+
+            if ( m_nIndex > -1 && m_iPlayhandle > 0 && saveImageIsStarting == false)
             {
                 String strPath;
-                DVR2Mjpeg DVR2Mjpeg = (DVR2Mjpeg)this.Parent;
+                DVR2Mjpeg DVR2Mjpeg = (DVR2Mjpeg)Parent;
+
                 foreach (TreeNode node in DVR2Mjpeg.devForm.DevTree.Nodes)
                 {
                     if (node.Name == "Device")
@@ -315,46 +327,105 @@ namespace DVR2Mjpeg
                                 CHANNEL_INFO chInfo = (CHANNEL_INFO)channelnode.Tag;
                                 if (chInfo.nWndIndex == m_nIndex)
                                 {
-                                    int y = System.DateTime.Now.Year;
-                                    int m = System.DateTime.Now.Month;
-                                    int d = System.DateTime.Now.Day;
-                                    int h = System.DateTime.Now.Hour;
-                                    int min = System.DateTime.Now.Minute;
-                                    int s = System.DateTime.Now.Second;
                                     strPath = String.Format(@"Z:\Pictures\bmp\{0}.bmp", m_nIndex + 1);
 
                                     bool bCatch = false;
 
+                                    saveImageIsStarting = true;
+
                                     try
                                     {
-                                        bCatch = XMSDK.H264_DVR_LocalCatchPic(m_iPlayhandle, strPath);
+                                        if (DVR2Mjpeg.isConnected) bCatch = XMSDK.H264_DVR_LocalCatchPic(m_iPlayhandle, strPath);
                                     }
-                                    catch
+                                    catch (AccessViolationException ex)
                                     {
-
+                                        Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".catchPictureToolStripMenuItem_Click.AccessViolationException", "DVR ERROR");
+                                        Debug.WriteLine(ex.ToString());
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".catchPictureToolStripMenuItem_Click.Exception", "DVR ERROR");
+                                        Debug.WriteLine(ex.ToString());
                                     }
 
-                                    if ( bCatch )
+                                    saveImageIsStarting = false;
+
+                                    if (bCatch)
                                     {
-                                        //System.Diagnostics.Process.Start(strPath);
                                         try
                                         {
                                             Bitmap bitmap = new Bitmap(strPath);
+                                            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
+                                            ImageCodecInfo ici = null;
+
+                                            foreach (ImageCodecInfo codec in codecs)
+                                            {
+                                                if (codec.MimeType == "image/jpeg")
+                                                    ici = codec;
+                                            }
+
+                                            EncoderParameters ep = new EncoderParameters();
+                                            ep.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)50);
+
                                             var stream = new MemoryStream();
-                                            bitmap.Save(stream, ImageFormat.Jpeg);
+                                            bitmap.Save(stream, ici, ep);
                                             bitmap.Dispose();
-                                            DirectoryInfo dir = new DirectoryInfo(@"Z:\Pictures\jpeg\");
-                                            if (!dir.Exists) dir.Create();
-                                            File.WriteAllBytes(String.Format(@"Z:\Pictures\jpeg\{0}.jpg", m_nIndex + 1), stream.GetBuffer());
+
+                                            DVR2Mjpeg parentForm = (DVR2Mjpeg)Parent;
+                                            if (parentForm.HttpServer.imageData.ContainsKey((m_nIndex + 1).ToString()))
+                                            {
+                                                parentForm.HttpServer.imageData[(m_nIndex + 1).ToString()] = stream.GetBuffer();
+                                            }
+                                            else
+                                            {
+                                                parentForm.HttpServer.imageData.Add((m_nIndex + 1).ToString(), stream.GetBuffer());
+                                            }
+
+                                            stream.Dispose();
+
+                                            
+                                            /*if (InvokeRequired) BeginInvoke((MethodInvoker)(() => {
+                                                Bitmap bitmap = GetBitmapFromHBitmap(panelVideo.Handle);
+
+                                                ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
+                                                ImageCodecInfo ici = null;
+
+                                                foreach (ImageCodecInfo codec in codecs)
+                                                {
+                                                    if (codec.MimeType == "image/jpeg")
+                                                        ici = codec;
+                                                }
+
+                                                EncoderParameters ep = new EncoderParameters();
+                                                ep.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)50);
+
+                                                var stream = new MemoryStream();
+                                                bitmap.Save(stream, ici, ep);
+                                                bitmap.Dispose();
+
+                                                DVR2Mjpeg parentForm = (DVR2Mjpeg)Parent;
+                                                if (parentForm.HttpServer.imageData.ContainsKey((m_nIndex + 1).ToString()))
+                                                {
+                                                    parentForm.HttpServer.imageData[(m_nIndex + 1).ToString()] = stream.GetBuffer();
+                                                }
+                                                else
+                                                {
+                                                    parentForm.HttpServer.imageData.Add((m_nIndex + 1).ToString(), stream.GetBuffer());
+                                                }
+
+                                                stream.Dispose();
+                                            }));*/
+                                            
                                         }
                                         catch (Exception ex)
                                         {
 
                                         }
+
                                     }
                                     else
                                     {
-                                        //MessageBox.Show("Catch Picture error !");
+
                                     }
                                     break;                                    
                                 }
@@ -419,7 +490,62 @@ namespace DVR2Mjpeg
 
         public void setSavePicture(bool state)
         {
-            checkBox1.Checked = state;
+            checkBoxSaveImage.Checked = state;
         }
+
+        /*private static Bitmap GetBitmapFromHBitmap(IntPtr nativeHBitmap)
+        {
+            Bitmap bmp = Bitmap.FromHbitmap(nativeHBitmap);
+
+            if (Bitmap.GetPixelFormatSize(bmp.PixelFormat) < 32)
+                return bmp;
+
+            BitmapData bmpData;
+
+            if (IsAlphaBitmap(bmp, out bmpData))
+                return GetlAlphaBitmapFromBitmapData(bmpData);
+
+            return bmp;
+        }
+
+        private static Bitmap GetlAlphaBitmapFromBitmapData(BitmapData bmpData)
+        {
+            return new Bitmap(
+                    bmpData.Width,
+                    bmpData.Height,
+                    bmpData.Stride,
+                    PixelFormat.Format32bppArgb,
+                    bmpData.Scan0);
+        }
+
+        private static bool IsAlphaBitmap(Bitmap bmp, out BitmapData bmpData)
+        {
+            Rectangle bmBounds = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+            bmpData = bmp.LockBits(bmBounds, ImageLockMode.ReadOnly, bmp.PixelFormat);
+
+            try
+            {
+                for (int y = 0; y <= bmpData.Height - 1; y++)
+                {
+                    for (int x = 0; x <= bmpData.Width - 1; x++)
+                    {
+                        Color pixelColor = Color.FromArgb(
+                            Marshal.ReadInt32(bmpData.Scan0, (bmpData.Stride * y) + (4 * x)));
+
+                        if (pixelColor.A > 0 & pixelColor.A < 255)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                bmp.UnlockBits(bmpData);
+            }
+
+            return false;
+        }*/
     }
 }

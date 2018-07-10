@@ -884,20 +884,21 @@ namespace DVR2Mjpeg
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
 	    public string ifName;
     };
+
     /// 所有网卡的DHCP配置
     public struct SDK_NetDHCPConfigAll
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
 	    public SDK_NetDHCPConfig[] vNetDHCPConfig;
     };
+
     class XMSDK
     {
-        
         public delegate void fDisConnect(int lLoginID, string pchDVRIP, int nDVRPort, IntPtr dwUser);
         public delegate bool fMessCallBack(int lLoginID, string pBuf, uint dwBufLen, IntPtr dwUser);
         public delegate void fTransComCallBack(int lLoginID, int lTransComType, StringBuilder pBuffer, uint dwBufSize, uint dwUser);
         public delegate void fDownLoadPosCallBack(int lPlayHandle, int lTotalSize, int lDownLoadSize, int dwUser);
-       public delegate void fPlayDrawCallBack(int lPlayHand, IntPtr hDc, uint nUser);
+        public delegate void fPlayDrawCallBack(int lPlayHand, IntPtr hDc, uint nUser);
         public delegate void fLocalPlayFileCallBack(uint lPlayHand, uint nUser);
         public delegate void InfoFramCallBack(int lPlayHand, uint nType, string pBuf, uint nSize, uint nUser);
         public delegate int fRealDataCallBack_V2(int lRealHandle,ref PACKET_INFO_EX pFrame, int dwUser);

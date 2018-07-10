@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using System.IO;
 
 // -------------------------------------------------
 // Developed By : Ragheed Al-Tayeb
@@ -22,12 +22,12 @@ namespace rtaNetworking.Streaming
     /// Provides a streaming server that can be used to stream any images source
     /// to any client.
     /// </summary>
-    public class ImageStreamingServer:IDisposable
+    public class ImageStreamingServer : IDisposable
     {
+        private String TAG = "ImageStreamingServer";
+
         private List<Socket> _Clients;
         private Thread _Thread;
-
-        private IWebServerCallback callback;
 
         public ImageStreamingServer()
         {
@@ -35,8 +35,9 @@ namespace rtaNetworking.Streaming
             _Thread = null;
 
             ImagesSource = new Dictionary<Socket, IEnumerable<Image>> { };
+            imageData = new Dictionary<string, byte[]>() { };
 
-            this.Interval = 50;
+            Interval = 100;
         }
 
         /// <summary>
@@ -44,6 +45,11 @@ namespace rtaNetworking.Streaming
         /// any connected client.
         /// </summary>
         public Dictionary<Socket, IEnumerable<Image>> ImagesSource { get; set; }
+
+        /// <summary>
+        /// Caching image data
+        /// </summary>
+        public Dictionary<string, byte[]> imageData { get; set; }
 
         /// <summary>
         /// Gets or sets the interval in milliseconds (or the delay time) between 
@@ -55,6 +61,11 @@ namespace rtaNetworking.Streaming
         /// Gets a collection of client sockets.
         /// </summary>
         public IEnumerable<Socket> Clients { get { return _Clients; } }
+
+        /// <summary>
+        /// Server callback
+        /// </summary>
+        private IWebServerCallback callback { get; set; }
 
         /// <summary>
         /// Returns the status of the server. True means the server is currently 
@@ -82,12 +93,12 @@ namespace rtaNetworking.Streaming
         /// </summary>
         public void Start()
         {
-            this.Start(8080, null);
+            Start(8080, null);
         }
 
         public void Stop()
         {
-            if (this.IsRunning)
+            if (IsRunning)
             {
                 try
                 {
@@ -97,7 +108,7 @@ namespace rtaNetworking.Streaming
                 finally
                 {
                     lock (_Clients)
-                    {                        
+                    {
                         foreach (var s in _Clients)
                         {
                             try
@@ -108,6 +119,10 @@ namespace rtaNetworking.Streaming
                         }
                         _Clients.Clear();
                     }
+
+                    lock (ImagesSource)
+                        ImagesSource.Clear();
+
                     _Thread = null;
                 }
             }
@@ -120,30 +135,31 @@ namespace rtaNetworking.Streaming
         /// <param name="state"></param>
         private void ServerThread(object state)
         {
-            try
+            Socket Server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            Server.Bind(new IPEndPoint(IPAddress.Any, (int)state));
+            Server.Listen(50);
+
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + string.Format(".ServerThread({0})", state), "WEB INFO");
+
+            foreach (Socket client in Server.IncommingConnectoins())
             {
-                Socket Server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-                Server.Bind(new IPEndPoint(IPAddress.Any,(int)state));
-                Server.Listen(10);
-
-                System.Diagnostics.Debug.WriteLine(string.Format("Server started on port {0}.", state));
-
-                foreach (Socket client in Server.IncommingConnectoins())
+                try
                 {
                     byte[] bytes = new byte[1500];
                     client.Receive(bytes);
-                    var str = System.Text.Encoding.Default.GetString(bytes);
+                    var str = Encoding.Default.GetString(bytes);
                     String path = GetLine(str, 1);
-                    if (path.IndexOf("GET /favicon.ico") == 0)
+
+                    if (path.IndexOf("GET /favicon.ico", StringComparison.CurrentCultureIgnoreCase) == 0)
                     {
                         client.Close();
                     }
-                    else if (path.IndexOf("GET /index.html") == 0)
+                    else if (path.IndexOf("GET /index.html", StringComparison.CurrentCultureIgnoreCase) == 0)
                     {
                         using (Stream stream = new NetworkStream(client, true))
                         {
-                            string html = "<html><head></head><body>Life on http://<HOST:8080>/?chanel=X<br /> Shots on http://<HOST:8080>/?chanel_shot=X</body></html>";
+                            string html = @"<html><head></head><body>Life on http://HOST:8080/?chanel=X<br /> Shots on http://HOST:8080/?chanel_shot=X </body></html>";
                             StringBuilder sb = new StringBuilder();
                             sb.AppendLine("HTTP/1.1 200 OK");
                             sb.AppendLine("content-type: text/html");
@@ -158,30 +174,29 @@ namespace rtaNetworking.Streaming
 
                         client.Close();
                     }
-                    else if (path.IndexOf("?chanel=") >= 0)
+                    else if (path.IndexOf("GET /?chanel=", StringComparison.CurrentCultureIgnoreCase) == 0)
                     {
                         string param = "?chanel=";
-                        string chanel = path.Substring(path.IndexOf(param) + param.Length, path.IndexOf(" ", path.IndexOf(param)) - (path.IndexOf(param) + param.Length));
+                        string chanel = path.Substring(path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase) + param.Length, path.IndexOf(" ", path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase)) - (path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase) + param.Length));
 
-                        callback.OnClientConnect(Int32.Parse(chanel));
-
-                        ImagesSource.Add(client, Dvr.Snapshots(chanel));
+                        lock (ImagesSource)
+                            ImagesSource.Add(client, Dvr.Snapshots(chanel, imageData));
                         ClientData clientdata = new ClientData();
                         clientdata.client = client;
                         clientdata.chanel = Int32.Parse(chanel);
                         ThreadPool.QueueUserWorkItem(new WaitCallback(ClientThread), clientdata);
 
                     }
-                    else if (path.IndexOf("?chanel_shot=") >= 0)
+                    else if (path.IndexOf("GET /?chanel_shot=", StringComparison.CurrentCultureIgnoreCase) == 0)
                     {
                         try
                         {
                             using (Stream stream = new NetworkStream(client, true))
                             {
                                 string param = "?chanel_shot=";
-                                string chanel = path.Substring(path.IndexOf(param) + param.Length, path.IndexOf(" ", path.IndexOf(param)) - (path.IndexOf(param) + param.Length));
+                                string chanel = path.Substring(path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase) + param.Length, path.IndexOf(" ", path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase)) - (path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase) + param.Length));
 
-                                callback.OnClientRequestShot(Int32.Parse(chanel));
+                                if (callback != null) callback.OnClientRequestShot(Int32.Parse(chanel));
 
                                 string strLink = String.Format(@"Z:\Pictures\jpeg\{0}.jpg", chanel);
 
@@ -206,7 +221,7 @@ namespace rtaNetworking.Streaming
                         }
                         catch (Exception e)
                         {
-                            client.Close();
+                            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ServerThread.Exception(" + e.Message + ")", "WEB ERROR");
                         }
                         finally
                         {
@@ -215,7 +230,7 @@ namespace rtaNetworking.Streaming
                     }
                     else
                     {
-                        using (Stream stream = new NetworkStream(client, true))
+                        /*using (Stream stream = new NetworkStream(client, true))
                         {
                             StringBuilder sb = new StringBuilder();
                             sb.AppendLine("HTTP/1.1 301 Moved Permanently");
@@ -224,14 +239,24 @@ namespace rtaNetworking.Streaming
 
                             byte[] data_byte = Encoding.ASCII.GetBytes(sb.ToString());
                             stream.Write(data_byte, 0, data_byte.Length);
-                        }
+                        }*/
 
                         client.Close();
                     }
-                }            
+                }
+                catch (SocketException e)
+                {
+                    Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ServerThread.SocketException(" + e.Message + ")", "WEB ERROR");
+                    Debug.WriteLine(e.ToString());
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ServerThread.Exception(" + e.Message + ")", "WEB ERROR");
+                    Debug.WriteLine(e.ToString());
+                }
             }
-            catch { }
-            this.Stop();
+
+            Stop();
         }
 
         string GetLine(string text, int lineNo)
@@ -250,34 +275,53 @@ namespace rtaNetworking.Streaming
 
             Socket socket = clientdata.client;
 
-            System.Diagnostics.Debug.WriteLine(string.Format("New client from {0}",socket.RemoteEndPoint.ToString()));
+            string apAdress = socket.RemoteEndPoint.ToString();
+
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + string.Format(".ClientThread.Connect({0})", apAdress), "WEB INFO");
 
             lock (_Clients)
                 _Clients.Add(socket);
 
             try
             {
+                if (callback != null) callback.OnClientConnect(clientdata.chanel);
+
                 using (MjpegWriter wr = new MjpegWriter(new NetworkStream(socket, true)))
                 {
                     // Writes the response header to the client.
                     wr.WriteHeader();
 
                     // Streams the images from the source to the client.
-                    foreach (var imgStream in Screen.Streams(this.ImagesSource[clientdata.client]))
+                    foreach (var imgStream in Dvr.Streams(ImagesSource[socket]))
                     {
-                        if (this.Interval > 0)
-                            Thread.Sleep(this.Interval);
+                        if (Interval > 0)
+                            Thread.Sleep(Interval);
 
                         wr.Write(imgStream);
                     }
                 }
             }
-            catch { }
+            catch (IOException e)
+            {
+                Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ClientThread.IOException(" + e.Message + ")", "WEB ERROR");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ClientThread.Exception(" + e.Message + ")", "WEB ERROR");
+            }
             finally
             {
-                callback.OnClientDisconnect(clientdata.chanel);
+                if (callback != null) callback.OnClientDisconnect(clientdata.chanel);
+
+                Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + string.Format(".ClientThread.Disconnect({0})", apAdress), "WEB INFO");
+
+                socket.Close();
+
                 lock (_Clients)
                     _Clients.Remove(socket);
+
+                lock (ImagesSource)
+                    ImagesSource.Remove(socket);
             }
         }
 
@@ -301,43 +345,53 @@ namespace rtaNetworking.Streaming
     {
         public static IEnumerable<Socket> IncommingConnectoins(this Socket server)
         {
-            while(true)
+            while (true)
                 yield return server.Accept();
         }
     }
 
     static class Dvr
     {
+        static private String TAG = "DVR";
         /// <summary>
         /// Returns a 
         /// </summary>
         /// <param name="delayTime"></param>
         /// <returns></returns>
-        public static IEnumerable<Image> Snapshots(string chanel)
+        public static IEnumerable<Image> Snapshots(string chanel, Dictionary<string, byte[]> imageData)
         {
-            string strLink = String.Format(@"Z:\Pictures\bmp\{0}.bmp", chanel);
-
-            var data = File.ReadAllBytes(strLink);
-            var ms = new MemoryStream(data);
-            Image image = Image.FromStream(ms);
+            MemoryStream ms;
+            Image image = null;
 
             while (true)
             {
-                try
+                int counter = 0;
+                while (counter < 50)
                 {
-                    data = File.ReadAllBytes(strLink);
-                    ms = new MemoryStream(data);
-                    image = Image.FromStream(ms);
+                    if (imageData.ContainsKey(chanel)) break;
+                    counter++;
+                    Thread.Sleep(100);
                 }
-                catch {}
+
+                if (counter == 50)
+                {
+                    image = Image.FromFile(@"C:\GitHub\C_Sharp\Surveillance_c_sharp\no_video.jpg");
+                }
+                else
+                {
+                    try
+                    {
+                        ms = new MemoryStream(imageData[chanel]);
+                        image = Image.FromStream(ms);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".Snapshots.Exception(" + e.Message + ")", "WEB ERROR");
+                    }
+                }
 
                 yield return image;
             }
-
-            ms.Dispose();
-            image.Dispose();
-
-            yield break;
         }
 
         internal static IEnumerable<MemoryStream> Streams(this IEnumerable<Image> source)
@@ -352,6 +406,7 @@ namespace rtaNetworking.Streaming
             }
 
             ms.Close();
+            ms.Dispose();
             ms = null;
 
             yield break;
@@ -400,14 +455,6 @@ namespace rtaNetworking.Streaming
                 yield return dstImage;
 
             }
-
-            srcGraphics.Dispose();
-            dstGraphics.Dispose();
-
-            srcImage.Dispose();
-            dstImage.Dispose();
-
-            yield break;
         }
 
         internal static IEnumerable<MemoryStream> Streams(this IEnumerable<Image> source)
@@ -425,6 +472,6 @@ namespace rtaNetworking.Streaming
             ms = null;
 
             yield break;
-        }        
+        }
     }
 }

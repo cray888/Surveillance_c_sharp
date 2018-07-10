@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Drawing;
+using System.Net.Sockets;
 
 // -------------------------------------------------
 // Developed By : Ragheed Al-Tayeb
@@ -24,19 +25,12 @@ namespace rtaNetworking.Streaming
         private static byte[] CRLF = new byte[] { 13, 10 };
         private static byte[] EmptyLine = new byte[] { 13, 10, 13, 10};
 
-        private string _Boundary;
+        public MjpegWriter(Stream stream) : this(stream, "--boundary") {}
 
-        public MjpegWriter(Stream stream)
-            : this(stream, "--boundary")
+        public MjpegWriter(Stream stream, string boundary)
         {
-
-        }
-
-        public MjpegWriter(Stream stream,string boundary)
-        {
-
-            this.Stream = stream;
-            this.Boundary = boundary;
+            Stream = stream;
+            Boundary = boundary;
         }
 
         public string Boundary { get; private set; }
@@ -44,51 +38,48 @@ namespace rtaNetworking.Streaming
 
         public void WriteHeader()
         {
-
             Write( 
                     "HTTP/1.1 200 OK\r\n" +
                     "Content-Type: multipart/x-mixed-replace; boundary=" +
-                    this.Boundary +
+                    Boundary +
                     "\r\n"
                  );
 
-            this.Stream.Flush();
+            Stream.Flush();
        }
 
         public void Write(Image image)
         {
             MemoryStream ms = BytesOf(image);
-            this.Write(ms);
+            Write(ms);
         }
 
         public void Write(MemoryStream imageStream)
         {
-
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine();
             sb.AppendLine(this.Boundary);
-            sb.AppendLine("Content-Type: image/jpeg");
             sb.AppendLine("Content-Length: " + imageStream.Length.ToString());
+            sb.AppendLine("Content-Type: image/jpeg");            
             sb.AppendLine(); 
 
             Write(sb.ToString());
-            imageStream.WriteTo(this.Stream);
-            Write("\r\n");
+            imageStream.WriteTo(Stream);
+            Write("\r\n");   
             
-            this.Stream.Flush();
-
+            Stream.Flush();
         }
 
         private void Write(byte[] data)
         {
-            this.Stream.Write(data, 0, data.Length);
+            Stream.Write(data, 0, data.Length);
         }
 
         private void Write(string text)
         {
             byte[] data = BytesOf(text);
-            this.Stream.Write(data, 0, data.Length);
+            Stream.Write(data, 0, data.Length);
         }
 
         private static byte[] BytesOf(string text)
@@ -105,12 +96,10 @@ namespace rtaNetworking.Streaming
 
         public string ReadRequest(int length)
         {
-
             byte[] data = new byte[length];
-            int count = this.Stream.Read(data,0,data.Length);
+            int count = Stream.Read(data,0,data.Length);
 
-            if (count != 0)
-                return Encoding.ASCII.GetString(data, 0, count);
+            if (count != 0) return Encoding.ASCII.GetString(data, 0, count);
 
             return null;
         }
@@ -119,17 +108,13 @@ namespace rtaNetworking.Streaming
 
         public void Dispose()
         {
-
             try
             {
-
-                if (this.Stream != null)
-                    this.Stream.Dispose();
-
+                if (Stream != null) Stream.Dispose();
             }
             finally
             {
-                this.Stream = null;
+                Stream = null;
             }
         }
 
