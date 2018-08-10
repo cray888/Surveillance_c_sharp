@@ -35,13 +35,11 @@ namespace DVR2Mjpeg
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void buttonOK_Click(object sender, EventArgs e)
         {
-           
-            
             if ( textBoxDevName.Text.Trim() != "" 
                 && textBoxIP.Text.Trim() != "" 
                 && textBoxport.Text.Trim() != ""
@@ -63,7 +61,6 @@ namespace DVR2Mjpeg
                             break;
                         }
                     }
-
                         
                     TreeNode nodeDev = new TreeNode();
                     nodeDev.Text = textBoxDevName.Text;
@@ -74,7 +71,6 @@ namespace DVR2Mjpeg
                     devInfo.szUserName = textBoxUsername.Text;
                     devInfo.szPsw = textBoxPassword.Text;
                     devInfo.NetDeviceInfo = dvrdevInfo;
-                //  nodeDev.Tag = nLoginID;
                     nodeDev.Tag = devInfo;
                     nodeDev.Name = "Device";
                     for (int i = 0; i < devInfo.NetDeviceInfo.byChanNum + devInfo.NetDeviceInfo.iDigChannel; i++ )
@@ -125,16 +121,12 @@ namespace DVR2Mjpeg
 				        break;
 			        }
                     MessageBox.Show(strErr);
-                   
                 }
-                
             }
             else
             {
                 MessageBox.Show("Please input all data!");
             }
-          
-           
         }
 
         private void buttonSearch_Click(object sender, EventArgs e)
@@ -142,27 +134,17 @@ namespace DVR2Mjpeg
             m_nDevNum = 0;
             int count = this.listViewDevSearched.Items.Count;
 
-            //for (int i = 0; i < count; i++)
-            //{
-            //    DEV_INFO* pData = (DEV_INFO*)m_listDevice.GetItemData(i);
-            //    if (pData)
-            //    {
-            //        delete pData;
-            //    }
-            //}
-            this.listViewDevSearched.Items.Clear();
+            listViewDevSearched.Items.Clear();
 
-            //Çå³ýMap
-            // m_mapDev.clear();
             buttonSearch.Enabled = false;
             searchThread = new Thread(this.SearchDevice);
-            //m_PromptDlg.ShowMsg(true);
             searchThread.Start();
-            while (!searchThread.IsAlive) ;
+            while (!searchThread.IsAlive);
 
-            this.Cursor = Cursors.WaitCursor;
-            this.Focus();
+            Cursor = Cursors.WaitCursor;
+            Focus();
         }
+
         private void SearchDevice()
         {	        
             int nRetLength = 0;
@@ -170,7 +152,6 @@ namespace DVR2Mjpeg
 
             int bRet = H264_DVR_SearchDevice(ptr, Marshal.SizeOf(typeof(SDK_CONFIG_NET_COMMON_V2)) * 1000, ref nRetLength, 5000);
 
-           
             for (int index = 0; index < 1000; index++)
             {
                 unsafe
@@ -181,24 +162,20 @@ namespace DVR2Mjpeg
                     IntPtr ptrTemp = new IntPtr(pDev);
                     m_Device[index] = (SDK_CONFIG_NET_COMMON_V2)Marshal.PtrToStructure(ptrTemp, typeof(SDK_CONFIG_NET_COMMON_V2));
                 }
-                
-               
             }
            
             if ( bRet > 0 && nRetLength > 0 )
             {
-                this.m_nDevNum = nRetLength / Marshal.SizeOf(this.m_Device[0]);
+                m_nDevNum = nRetLength / Marshal.SizeOf(m_Device[0]);
             }
 
-         
             searchThread.Interrupt();
 	        buttonSearch.Enabled = true;
             this.Cursor = Cursors.Default;
-		    //m_PromptDlg.ShowMsg(false);
     		
 		    int count = listViewDevSearched.Items.Count;
 		    int i = 0; 
-		    //check
+
 		    for ( i = 0; i < count; i ++ )
 		    {
 			    string strIp;
@@ -216,7 +193,7 @@ namespace DVR2Mjpeg
     				
 				    if ( strIp2 == strIp && nPort2 == nPort )
 				    {
-                       // m_Device[j];
+                       
 				    }
 			    }
 		    }
@@ -258,12 +235,10 @@ namespace DVR2Mjpeg
                 
 			    if ( nFlag==0 )
 			    {
-                    //delete pData;
-                    //pData = NULL;
 				    continue;
-			    }else
+			    }
+                else
 			    {
-				  
                     ListViewItem item = new ListViewItem();
                     ListViewItem.ListViewSubItem subitem0= new ListViewItem.ListViewSubItem();
                     ListViewItem.ListViewSubItem subitem1 = new ListViewItem.ListViewSubItem();
@@ -281,22 +256,20 @@ namespace DVR2Mjpeg
                     item.SubItems.Insert(2, subitem2);
 	
 				    pData.nListNum = count + nIndex;
-				    //m_mapDev[ nIndex ] = pData;
-
+				    
                     item.Tag = pData;
 				    listViewDevSearched.Items.Insert(count + nIndex,item);
                     dict.Add(nIndex, pData);
                     
 				    nIndex ++;
-    				
 			    }
 		    }
-		    this.Capture = false;  //ÊÍ·ÅÊó±ê
+            Capture = false;
          }
 
         private void listViewDevSearched_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            this.buttonOK_Click(null, null);
+            buttonOK_Click(null, null);
         }
 
         private void listViewDevSearched_SelectedIndexChanged(object sender, EventArgs e)
@@ -321,10 +294,7 @@ namespace DVR2Mjpeg
                         {
                             strPort = subItem.Text;
                         }
-
                     }
-
-
                 }
             }
 

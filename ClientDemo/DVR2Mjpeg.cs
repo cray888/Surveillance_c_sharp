@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Diagnostics;
 using rtaNetworking.Streaming;
+using Tao.FFmpeg;
+using System.Timers;
 
 namespace DVR2Mjpeg
 {
@@ -17,7 +19,7 @@ namespace DVR2Mjpeg
         //HTTP server variable
         public ImageStreamingServer HttpServer;
         private int[] clientConnectedPerChanel = new int[32];
-
+        
         //DVR variable
         public Boolean isConnected;
         public int chanelOpened;
@@ -33,9 +35,10 @@ namespace DVR2Mjpeg
         public static Dictionary<int, DEV_INFO> dictDiscontDev = new Dictionary<int, DEV_INFO>();
 
         private System.Timers.Timer timerDisconnect = new System.Timers.Timer(30000);
-        private System.Timers.ElapsedEventHandler reconnectHandler;
+        private ElapsedEventHandler reconnectHandler;
+
         private XMSDK.fDisConnect disCallback;
-        private XMSDK.fMessCallBack msgcallback;        
+        private XMSDK.fMessCallBack msgcallback;
 
         bool  MessCallBack(int lLoginID, string pBuf, uint dwBufLen, IntPtr dwUser)
         {
@@ -79,10 +82,16 @@ namespace DVR2Mjpeg
 
         public DVR2Mjpeg()
         {
+            //http://nullpro.info/2013/rabota-s-fajlom-konfiguracii/
+            //var value = System.Configuration.ConfigurationManager.AppSettings["server"].ToString();
+
             Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".DVR2Mjpeg()", "DVR INFO");
 
             //Init this form
-            InitializeComponent();            
+            InitializeComponent();
+
+            //FFmpeg
+            FFmpeg.av_register_all();
 
             //Init video forms
             for (int i = 0; i < 32; i++)
@@ -92,28 +101,27 @@ namespace DVR2Mjpeg
                 m_videoform[i].SetWndIndex(i);
             }
 
-            comboBoxCamCount.SelectedIndex = 4;
-
             //Init dev forms
             devForm = new DevForm();
             Controls.Add(devForm);
             devForm.Location = new Point(880, 10);
             devForm.Anchor = (AnchorStyles.Top | AnchorStyles.Right);                        
+            comboBoxCamCount.SelectedIndex = 4;
+            ArrayWindow(32, false);
+            SetActiveWnd(0);
 
             InitSDK();
 
             devForm.ReadXML();
 
             //Init reconnect handler
-            reconnectHandler = new System.Timers.ElapsedEventHandler(ReConnect);
+            reconnectHandler = new ElapsedEventHandler(ReConnect);
             GC.KeepAlive(reconnectHandler);
-            timerDisconnect.Elapsed += new System.Timers.ElapsedEventHandler(reconnectHandler); 
-       
-            ArrayWindow(32);
-            SetActiveWnd(0);   
+            timerDisconnect.Elapsed += new ElapsedEventHandler(reconnectHandler);           
         }
 
-        public DVR2Mjpeg(bool noInit) { }
+        public DVR2Mjpeg(bool noInit) {
+        }
 
         private void OpenChanel(int indexWind, int chanelID, int stream, bool savePicture)
         {
@@ -128,8 +136,6 @@ namespace DVR2Mjpeg
                 chanInfo.nWndIndex = indexWind;
                 nodeDev.Nodes[chanelID].Tag = chanInfo;
 
-                if (savePicture) m_videoform[indexWind].setSavePicture(savePicture);
-
                 chanelOpened++;
                 isConnected = true;
             }
@@ -138,7 +144,6 @@ namespace DVR2Mjpeg
         private void CloseChanel(int indexWind)
         {
             m_videoform[indexWind].Close();
-            m_videoform[indexWind].setSavePicture(false);
             chanelOpened--;
             if (chanelOpened == 0) isConnected = false;
         }
@@ -153,7 +158,9 @@ namespace DVR2Mjpeg
             int bResult = XMSDK.H264_DVR_Init(disCallback, Handle);
 
             msgcallback  = new XMSDK.fMessCallBack(MessCallBack);
+            GC.KeepAlive(msgcallback);
             XMSDK.H264_DVR_SetDVRMessCallBack(msgcallback, Handle);
+
             XMSDK.H264_DVR_SetConnectTime(5000, 25);
 
             return bResult;
@@ -166,29 +173,32 @@ namespace DVR2Mjpeg
             return XMSDK.H264_DVR_Cleanup();
         }
 
-        public void ArrayWindow(int iNumber)
+        public void ArrayWindow(int iNumber, bool bResizeForm)
         {
             m_nTotalWnd = iNumber;
 
-            Rectangle rect = this.ClientRectangle;
+            Rectangle rect = ClientRectangle;
             int  iWidth, iHeight;
             int nFullWidth = rect.Width;
             int nFullHeight = rect.Height;
-            iWidth = (int)(nFullWidth * 0.75515625);
-            iHeight = (int)(nFullHeight * 0.91);
+            iWidth = nFullWidth - 270;
+            iHeight = nFullHeight - 20;
 
             int i = 0;
-            for (i = 0; i < 32; i++)
+            if (bResizeForm == false)
             {
-                m_videoform[i].Hide();
+                for (i = 0; i < 32; i++)
+                {
+                    m_videoform[i].Hide();
+                }
             }
-            
+
             int nNull = 3;
 
             switch (iNumber)
             {
                 case 1:
-                    m_videoform[0].SetBounds(3+0,0,iWidth,iHeight);
+                    m_videoform[0].SetBounds(3 + 0, 0, iWidth, iHeight);
                     m_videoform[0].Show();
                     break;
                 case 4:
@@ -513,7 +523,7 @@ namespace DVR2Mjpeg
             m_devInfo = pDev;
         }
 
-        public void ReConnect(object source, System.Timers.ElapsedEventArgs e)
+        public void ReConnect(object source, ElapsedEventArgs e)
         {
             Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ReConnect(source,e)", "DVR INFO");
 
@@ -544,7 +554,7 @@ namespace DVR2Mjpeg
 
                 foreach (Form form in Application.OpenForms)
                 {
-                    if (form.Name == "ClientDemo")
+                    if (form.Name == "DVR2Mjpeg")
                     {
                         clientForm = (DVR2Mjpeg)form;
                         break;
@@ -647,7 +657,7 @@ namespace DVR2Mjpeg
             {
                 nWndNum = 32;
             }
-            ArrayWindow(nWndNum);
+            ArrayWindow(nWndNum, false);
         }
 
         private void DVR2Mjpeg_KeyUp(object sender, KeyEventArgs e)
@@ -703,17 +713,8 @@ namespace DVR2Mjpeg
 
         private void DVR2Mjpeg_Load(object sender, EventArgs e)
         {
-            OpenCams();
             HttpServer = new ImageStreamingServer();
             HttpServer.Start(8080, this);
-        }
-
-        private void OpenCams()
-        {            
-            /*OpenChanel(1, 1, true);
-            OpenChanel(12, 12, true);
-            OpenChanel(18, 18, true);
-            OpenChanel(24, 24, true);*/
         }
 
         //////////////////////////////////////////////
@@ -732,7 +733,7 @@ namespace DVR2Mjpeg
                 else
                     OpenChanel(chanel, chanel, 0, true);
 
-                Thread.Sleep(1000);
+                //Thread.Sleep(1000);
             }
         }
 
@@ -772,6 +773,32 @@ namespace DVR2Mjpeg
                     BeginInvoke((MethodInvoker)(() => CloseChanel(chanel)));
                 else CloseChanel(chanel);
             }
+        }
+
+        private void DVR2Mjpeg_SizeChanged(object sender, EventArgs e)
+        {
+            int nWndNum = 4;
+            if (comboBoxCamCount.SelectedIndex == 0)
+            {
+                nWndNum = 1;
+            }
+            else if (comboBoxCamCount.SelectedIndex == 1)
+            {
+                nWndNum = 4;
+            }
+            else if (comboBoxCamCount.SelectedIndex == 2)
+            {
+                nWndNum = 9;
+            }
+            else if (comboBoxCamCount.SelectedIndex == 3)
+            {
+                nWndNum = 16;
+            }
+            else if (comboBoxCamCount.SelectedIndex == 4)
+            {
+                nWndNum = 32;
+            }
+            ArrayWindow(nWndNum, true);
         }
     }
 }

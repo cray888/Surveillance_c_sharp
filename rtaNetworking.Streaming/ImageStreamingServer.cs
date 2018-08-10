@@ -375,7 +375,7 @@ namespace rtaNetworking.Streaming
 
                 if (counter == 50)
                 {
-                    image = Image.FromFile(@"C:\GitHub\C_Sharp\Surveillance_c_sharp\no_video.jpg");
+                    image = Image.FromFile("no_video.jpg");
                 }
                 else
                 {

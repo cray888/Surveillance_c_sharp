@@ -12,7 +12,6 @@ namespace DVR2Mjpeg
      
     public partial class DevForm : UserControl
     {
-
         Dictionary<int, DEV_INFO> m_devMap;
         Dictionary<int, DEV_INFO> m_devReconnetMap;
         DEV_INFO m_talkDevice;
@@ -23,14 +22,17 @@ namespace DVR2Mjpeg
         {
             InitializeComponent();
         }
+
         public Dictionary<int, DEV_INFO> GetDeviceMap()
         {
             return m_devMap;
         }
+
         bool StartTalkPlay(int nPort)
         {
             return true;
         }
+
         bool StartTalk( ref DEV_INFO pDevice)
         {
             IntPtr pdev = new IntPtr();
@@ -59,13 +61,10 @@ namespace DVR2Mjpeg
                         m_lTalkHandle = (IntPtr)null; ;
                         return false;
                     }
-
                 }
-
-            }
-          
-           
+            }           
         }
+
         bool StopTalk( ref DEV_INFO pDevice)
         {
             unsafe
@@ -78,20 +77,23 @@ namespace DVR2Mjpeg
                 }
                 return false;
             }
-      
         }
+
         bool StopTalkPlay(int nPort)
         {
             return true;
         }
+
         bool SendTalkData(IntPtr pDataBuffer, uint dwDataLength)
         {
             return true;
         }
+
         bool InputTalkData(IntPtr pBuf, uint nBufLen)
         {
             return true;
         }
+
         public DEV_INFO ReadXML()
         {
             XmlReaderSettings settings = new XmlReaderSettings();
@@ -236,6 +238,7 @@ namespace DVR2Mjpeg
             XMSDK.H264_DVR_SetupAlarmChan(lLogin);
             return lLogin;
         }
+
         void ReConnect(int lLoginID, string pchDVRIP, int nDVRPort)
         {
 
@@ -254,7 +257,7 @@ namespace DVR2Mjpeg
                 TreeNode nodeDev = e.Node.Parent;
                 DEV_INFO devinfo = (DEV_INFO)nodeDev.Tag;
                 CHANNEL_INFO chanInfo = (CHANNEL_INFO)e.Node.Tag;
-                int iRealHandle = ((DVR2Mjpeg)this.Parent).m_videoform[((DVR2Mjpeg)this.Parent).m_nCurIndex].ConnectRealPlay(ref devinfo, chanInfo.nChannelNo);
+                int iRealHandle = ((DVR2Mjpeg)Parent).m_videoform[((DVR2Mjpeg)Parent).m_nCurIndex].ConnectRealPlay(ref devinfo, chanInfo.nChannelNo);
                 if ( iRealHandle > 0 )
                 {
                     CHANNEL_INFO chInfo = (CHANNEL_INFO)e.Node.Tag;

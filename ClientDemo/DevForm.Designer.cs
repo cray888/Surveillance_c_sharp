@@ -39,9 +39,9 @@
             // DevTree
             // 
             this.DevTree.ContextMenuStrip = this.contextMenuStripDevTree;
-            this.DevTree.Location = new System.Drawing.Point(18, 16);
+            this.DevTree.Location = new System.Drawing.Point(0, 17);
             this.DevTree.Name = "DevTree";
-            this.DevTree.Size = new System.Drawing.Size(198, 420);
+            this.DevTree.Size = new System.Drawing.Size(231, 447);
             this.DevTree.TabIndex = 0;
             this.DevTree.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.DevTree_NodeMouseDoubleClick);
             // 
@@ -50,12 +50,12 @@
             this.contextMenuStripDevTree.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addDeviceToolStripMenuItem});
             this.contextMenuStripDevTree.Name = "contextMenuStrip1";
-            this.contextMenuStripDevTree.Size = new System.Drawing.Size(131, 26);
+            this.contextMenuStripDevTree.Size = new System.Drawing.Size(135, 26);
             // 
             // addDeviceToolStripMenuItem
             // 
             this.addDeviceToolStripMenuItem.Name = "addDeviceToolStripMenuItem";
-            this.addDeviceToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.addDeviceToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.addDeviceToolStripMenuItem.Text = "Add Device";
             this.addDeviceToolStripMenuItem.Click += new System.EventHandler(this.addDeviceToolStripMenuItem_Click);
             // 
@@ -64,19 +64,19 @@
             this.labelDevTree.AutoSize = true;
             this.labelDevTree.Location = new System.Drawing.Point(97, 1);
             this.labelDevTree.Name = "labelDevTree";
-            this.labelDevTree.Size = new System.Drawing.Size(47, 12);
+            this.labelDevTree.Size = new System.Drawing.Size(49, 13);
             this.labelDevTree.TabIndex = 1;
             this.labelDevTree.Text = "DevTree";
             // 
             // DevForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ContextMenuStrip = this.contextMenuStripDevTree;
             this.Controls.Add(this.labelDevTree);
             this.Controls.Add(this.DevTree);
             this.Name = "DevForm";
-            this.Size = new System.Drawing.Size(231, 453);
+            this.Size = new System.Drawing.Size(231, 464);
             this.contextMenuStripDevTree.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();

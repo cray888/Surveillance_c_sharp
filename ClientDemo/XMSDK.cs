@@ -632,7 +632,7 @@ namespace DVR2Mjpeg
     public struct PACKET_INFO_EX
     {
 	    public int		nPacketType;				// 包类型,见MEDIA_PACK_TYPE
-	    public string	pPacketBuffer;				// 缓存区地址
+	    public IntPtr	pPacketBuffer;				// 缓存区地址
 	    public uint	dwPacketSize;				// 包的大小
 
 	    // 绝对时标
@@ -901,8 +901,8 @@ namespace DVR2Mjpeg
         public delegate void fPlayDrawCallBack(int lPlayHand, IntPtr hDc, uint nUser);
         public delegate void fLocalPlayFileCallBack(uint lPlayHand, uint nUser);
         public delegate void InfoFramCallBack(int lPlayHand, uint nType, string pBuf, uint nSize, uint nUser);
-        public delegate int fRealDataCallBack_V2(int lRealHandle,ref PACKET_INFO_EX pFrame, int dwUser);
-        public delegate int fRealDataCallBack(int lRealHandle, int dwDataType, string strBuf,int lbufsize,int dwUser);
+        public delegate int fRealDataCallBack_V2(int lRealHandle, ref PACKET_INFO_EX pFrame, int dwUser);
+        public delegate int fRealDataCallBack(int lRealHandle, int dwDataType, IntPtr strBuf,int lbufsize,int dwUser);
 
         [DllImport("NetSdk.dll")]
         public static extern void H264_DVR_SetDVRMessCallBack(fMessCallBack cbAlarmcallback, IntPtr lUser);
@@ -934,6 +934,7 @@ namespace DVR2Mjpeg
 
         [DllImport("NetSdk.dll")]
         public static extern int H264_DVR_GetDevConfig(int lLoginID, uint dwCommand, int nChannelNO, IntPtr bufptr, uint dwOutBufferSize, out uint lpBytesReturned, int waittime);
+
         [DllImport("NetSdk.dll")]
         public static extern int H264_DVR_SetDevConfig(int lLoginID, uint dwCommand, int nChannelNO, IntPtr bufptr, uint dwInBufferSize, int waittime);
 
@@ -963,12 +964,27 @@ namespace DVR2Mjpeg
 
         [DllImport("NetSdk.dll")]
         public static extern int H264_DVR_RealPlay(int lLoginID, ref H264_DVR_CLIENTINFO lpClientInfo);
-  
+
+        [DllImport("NetSdk.dll")]
+        public static extern bool H264_DVR_SetRealDataCallBack(int lRealHandle, fRealDataCallBack cbRealData, int dwUser);
+
+        [DllImport("NetSdk.dll")]
+        public static extern bool H264_DVR_SetRealDataCallBack_V2(int lRealHandle, fRealDataCallBack_V2 cbRealData, int dwUser);
+
+        //H264_DVR_API bool CALL_METHOD H264_DVR_DelRealDataCallBack_V2(long lRealHandle, fRealDataCallBack_V2 cbRealData, long dwUser);
+        [DllImport("NetSdk.dll")]
+        public static extern bool H264_DVR_DelRealDataCallBack(int lRealHandle, fRealDataCallBack cbRealData, int dwUser);
+
+        [DllImport("NetSdk.dll")]
+        public static extern bool H264_DVR_DelRealDataCallBack_V2(int lRealHandle, fRealDataCallBack_V2 cbRealData, int dwUser);
+
         [DllImport("NetSdk.dll")]
         public static extern Int32 H264_DVR_Login(StringBuilder sDVRIP, ushort wDVRPort, StringBuilder sUserName, StringBuilder sPassword,
                               out H264_DVR_DEVICEINFO lpDeviceInfo, out short error, SocketStyle socketstyle);
+
         [DllImport("NetSdk.dll")]
         public static extern Int32 H264_DVR_Logout(int lLoginID);//登出设备
+
         [DllImport("NetSdk.dll")]
         public static extern void DisConnectBackCallFunc(Int32 lLoginID, IntPtr pchDVRIP, ushort nDVRPort, uint dwUser);
 

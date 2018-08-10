@@ -110,7 +110,7 @@ namespace DVR2Mjpeg
             }
         }
 
-        private int RealDataCallBack(int lRealHandle, int dwDataType, string strBuf, int lbufsize, int dwUser)
+        private int RealDataCallBack(int lRealHandle, int dwDataType, IntPtr strBuf, int lbufsize, int dwUser)
         {
             m_nNetPlayHandle = 0;
             return 0;
@@ -131,22 +131,32 @@ namespace DVR2Mjpeg
             {
                 m_nLocalplayHandle = 0;
             }
-            timerLocalPlayBack.Enabled = false;
-            trackBarLocalPlayPos.Value = 0;
+            timerLocalPlayBack.Enabled = false;            
+
+            if (InvokeRequired)
+                BeginInvoke((MethodInvoker)(() => trackBarLocalPlayPos.Value = 0));
+            else 
+                trackBarLocalPlayPos.Value = 0;
         }
 
         public void recordTime(object source, System.Timers.ElapsedEventArgs e)
         {
             if (!m_bPauseLocalPlay)
             {
-                float pos = XMSDK.H264_DVR_GetPlayPos(m_nLocalplayHandle);
-                trackBarLocalPlayPos.Value = Convert.ToInt32(pos * 1000);
+                float pos = XMSDK.H264_DVR_GetPlayPos(m_nLocalplayHandle);                
+
+                if (InvokeRequired)
+                    BeginInvoke((MethodInvoker)(() => trackBarLocalPlayPos.Value = Convert.ToInt32(pos * 1000)));
+                else
+                    trackBarLocalPlayPos.Value = Convert.ToInt32(pos * 1000);
             }
 
             if (!m_bPauseNetPlay)
             {
                 float pos = XMSDK.H264_DVR_GetPlayPos(m_nNetPlayHandle);
-                this.BeginInvoke((MethodInvoker)(() => trackBarNetPlayPos.Value = Convert.ToInt32(pos * 1000)));
+                if (InvokeRequired)
+                    BeginInvoke((MethodInvoker)(() => trackBarNetPlayPos.Value = Convert.ToInt32(pos * 1000)));
+                else trackBarNetPlayPos.Value = Convert.ToInt32(pos * 1000);
             }
 
             if (m_DownLoadFileHandle != 0)
@@ -160,15 +170,18 @@ namespace DVR2Mjpeg
                     btnDownload.Text = "Download";
                     MessageBox.Show("Get download process fail !");
                     timerDownload.Stop();
-
                 }
+
                 if (nPos == 100)		//download end
                 {
                     XMSDK.H264_DVR_StopGetFile(m_DownLoadFileHandle);
                     m_DownLoadFileHandle = 0;
 
                     timerDownload.Stop();
-                    progressBarDownloadPos.Value = 0;
+                    if (InvokeRequired)
+                        BeginInvoke((MethodInvoker)(() => progressBarDownloadPos.Value = 0));
+                    else
+                        progressBarDownloadPos.Value = 0;                    
                     btnDownload.Text = "Download";
                     MessageBox.Show("Download Finished");
                     return;
@@ -178,24 +191,27 @@ namespace DVR2Mjpeg
                 {
                     XMSDK.H264_DVR_StopGetFile(m_DownLoadFileHandle);
                     m_DownLoadFileHandle = 0;
-                    progressBarDownloadPos.Value = 0;
+                    if (InvokeRequired)
+                        BeginInvoke((MethodInvoker)(() => progressBarDownloadPos.Value = 0));
+                    else
+                        progressBarDownloadPos.Value = 0;
                     btnDownload.Text = "Download";
                     MessageBox.Show("Download Error");
                 }
                 else
                 {
-                    progressBarDownloadPos.Value = nPos;
+                    if (InvokeRequired)
+                        BeginInvoke((MethodInvoker)(() => progressBarDownloadPos.Value = nPos));
+                    else
+                        progressBarDownloadPos.Value = nPos;                    
                 }
             }
-
         }
-
 
         private void btnOpenFile_Click(object sender, EventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
-            // fileDialog.InitialDirectory = "d:\\";
-            fileDialog.Title = "选择文件";
+            fileDialog.Title = "Select video file";
             fileDialog.Filter = "h264 files (*.h264)|*.h264";
             fileDialog.FilterIndex = 1;
             fileDialog.RestoreDirectory = true;
@@ -203,11 +219,9 @@ namespace DVR2Mjpeg
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
                 String fileName = fileDialog.FileName;
-                // 使用文件名
                 m_nLocalplayHandle = Convert.ToInt32(XMSDK.H264_DVR_StartLocalPlay(fileName, pictureBoxVideoWnd.Handle, null, Convert.ToUInt32(0)));
                 if (m_nLocalplayHandle > 0)
                 {
-                    //   MessageBox.Show("success");
                     timerLocalPlayBack.Elapsed += new System.Timers.ElapsedEventHandler(recordTime);
                     timerLocalPlayBack.AutoReset = true;
                     timerLocalPlayBack.Enabled = true;
@@ -221,9 +235,8 @@ namespace DVR2Mjpeg
             }
             else
             {
-                // 没有选择文件时的操作
-            }
 
+            }
         }
 
         private void btnLocalStop_Click(object sender, EventArgs e)

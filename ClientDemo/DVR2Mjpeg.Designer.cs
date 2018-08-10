@@ -41,15 +41,15 @@
             // btnTransparent
             // 
             this.btnTransparent.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnTransparent.Location = new System.Drawing.Point(993, 527);
+            this.btnTransparent.Location = new System.Drawing.Point(993, 571);
             this.btnTransparent.Name = "btnTransparent";
-            this.btnTransparent.Size = new System.Drawing.Size(99, 31);
+            this.btnTransparent.Size = new System.Drawing.Size(99, 34);
             this.btnTransparent.TabIndex = 1;
             this.btnTransparent.Text = "TransparentCom";
             this.btnTransparent.UseVisualStyleBackColor = true;
             this.btnTransparent.Click += new System.EventHandler(this.btnTransparent_Click);
             // 
-            // comboBox1
+            // comboBoxCamCount
             // 
             this.comboBoxCamCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBoxCamCount.FormattingEnabled = true;
@@ -59,18 +59,18 @@
             "9",
             "16",
             "32"});
-            this.comboBoxCamCount.Location = new System.Drawing.Point(938, 617);
+            this.comboBoxCamCount.Location = new System.Drawing.Point(938, 668);
             this.comboBoxCamCount.Name = "comboBoxCamCount";
-            this.comboBoxCamCount.Size = new System.Drawing.Size(103, 20);
+            this.comboBoxCamCount.Size = new System.Drawing.Size(103, 21);
             this.comboBoxCamCount.TabIndex = 3;
             this.comboBoxCamCount.SelectedIndexChanged += new System.EventHandler(this.comboBoxCamCount_SelectedIndexChanged);
             // 
             // btnPTZ
             // 
             this.btnPTZ.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnPTZ.Location = new System.Drawing.Point(993, 452);
+            this.btnPTZ.Location = new System.Drawing.Point(993, 490);
             this.btnPTZ.Name = "btnPTZ";
-            this.btnPTZ.Size = new System.Drawing.Size(98, 30);
+            this.btnPTZ.Size = new System.Drawing.Size(98, 33);
             this.btnPTZ.TabIndex = 13;
             this.btnPTZ.Text = "PTZ";
             this.btnPTZ.UseVisualStyleBackColor = true;
@@ -80,9 +80,9 @@
             // 
             this.btncolor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btncolor.Enabled = false;
-            this.btncolor.Location = new System.Drawing.Point(886, 488);
+            this.btncolor.Location = new System.Drawing.Point(886, 529);
             this.btncolor.Name = "btncolor";
-            this.btncolor.Size = new System.Drawing.Size(100, 31);
+            this.btncolor.Size = new System.Drawing.Size(100, 34);
             this.btncolor.TabIndex = 14;
             this.btncolor.Text = "Color";
             this.btncolor.UseVisualStyleBackColor = true;
@@ -90,9 +90,9 @@
             // btnplayback
             // 
             this.btnplayback.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnplayback.Location = new System.Drawing.Point(993, 489);
+            this.btnplayback.Location = new System.Drawing.Point(993, 530);
             this.btnplayback.Name = "btnplayback";
-            this.btnplayback.Size = new System.Drawing.Size(98, 30);
+            this.btnplayback.Size = new System.Drawing.Size(98, 33);
             this.btnplayback.TabIndex = 15;
             this.btnplayback.Text = "Playback";
             this.btnplayback.UseVisualStyleBackColor = true;
@@ -101,9 +101,9 @@
             // btnDevConfig
             // 
             this.btnDevConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDevConfig.Location = new System.Drawing.Point(886, 527);
+            this.btnDevConfig.Location = new System.Drawing.Point(886, 571);
             this.btnDevConfig.Name = "btnDevConfig";
-            this.btnDevConfig.Size = new System.Drawing.Size(100, 31);
+            this.btnDevConfig.Size = new System.Drawing.Size(100, 34);
             this.btnDevConfig.TabIndex = 16;
             this.btnDevConfig.Text = "DevConfig";
             this.btnDevConfig.UseVisualStyleBackColor = true;
@@ -113,9 +113,9 @@
             // 
             this.btnNetAlarm.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnNetAlarm.Enabled = false;
-            this.btnNetAlarm.Location = new System.Drawing.Point(886, 564);
+            this.btnNetAlarm.Location = new System.Drawing.Point(886, 611);
             this.btnNetAlarm.Name = "btnNetAlarm";
-            this.btnNetAlarm.Size = new System.Drawing.Size(100, 31);
+            this.btnNetAlarm.Size = new System.Drawing.Size(100, 34);
             this.btnNetAlarm.TabIndex = 17;
             this.btnNetAlarm.Text = "NetAlarm";
             this.btnNetAlarm.UseVisualStyleBackColor = true;
@@ -124,18 +124,18 @@
             // 
             this.btnNetKeyboard.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnNetKeyboard.Enabled = false;
-            this.btnNetKeyboard.Location = new System.Drawing.Point(993, 564);
+            this.btnNetKeyboard.Location = new System.Drawing.Point(993, 611);
             this.btnNetKeyboard.Name = "btnNetKeyboard";
-            this.btnNetKeyboard.Size = new System.Drawing.Size(99, 31);
+            this.btnNetKeyboard.Size = new System.Drawing.Size(99, 34);
             this.btnNetKeyboard.TabIndex = 18;
             this.btnNetKeyboard.Text = "NetKeyboard";
             this.btnNetKeyboard.UseVisualStyleBackColor = true;
             // 
-            // ClientDemo
+            // DVR2Mjpeg
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1123, 664);
+            this.ClientSize = new System.Drawing.Size(1123, 719);
             this.Controls.Add(this.btnNetKeyboard);
             this.Controls.Add(this.btnNetAlarm);
             this.Controls.Add(this.btnDevConfig);
@@ -144,14 +144,15 @@
             this.Controls.Add(this.btnPTZ);
             this.Controls.Add(this.comboBoxCamCount);
             this.Controls.Add(this.btnTransparent);
-            this.Name = "ClientDemo";
+            this.Name = "DVR2Mjpeg";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ClientDemo";
-            this.Load += new System.EventHandler(this.DVR2Mjpeg_Load);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.DVR2Mjpeg_Paint);
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DVR2Mjpeg_FormClosed);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.DVR2Mjpeg_KeyUp);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DVR2Mjpeg_FormClosing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DVR2Mjpeg_FormClosed);
+            this.Load += new System.EventHandler(this.DVR2Mjpeg_Load);
+            this.SizeChanged += new System.EventHandler(this.DVR2Mjpeg_SizeChanged);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.DVR2Mjpeg_Paint);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.DVR2Mjpeg_KeyUp);
             this.ResumeLayout(false);
 
         }

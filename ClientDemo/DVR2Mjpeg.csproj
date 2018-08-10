@@ -31,6 +31,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -77,6 +79,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
@@ -204,6 +207,10 @@
     <ProjectReference Include="..\rtaNetworking.Streaming\rtaNetworking.Streaming.csproj">
       <Project>{f961a5df-7ae0-43f3-8ca3-01340d4a815f}</Project>
       <Name>rtaNetworking.Streaming</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpFFmpeg\SharpFFmpeg.csproj">
+      <Project>{11e4451c-a61d-4680-ac23-d6e1391b3262}</Project>
+      <Name>SharpFFmpeg</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -29,44 +29,43 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.catchPictureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.soundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.talkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.checkBoxSaveImage = new System.Windows.Forms.CheckBox();
             this.panelVideo = new System.Windows.Forms.Panel();
-            this.contextMenuStrip1.SuspendLayout();
+            this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
-            // contextMenuStrip1
+            // contextMenuStrip
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.catchPictureToolStripMenuItem,
             this.soundToolStripMenuItem,
             this.talkToolStripMenuItem,
             this.closeToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 114);
+            this.contextMenuStrip.Name = "contextMenuStrip1";
+            this.contextMenuStrip.Size = new System.Drawing.Size(146, 92);
             // 
             // catchPictureToolStripMenuItem
             // 
             this.catchPictureToolStripMenuItem.Name = "catchPictureToolStripMenuItem";
-            this.catchPictureToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.catchPictureToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.catchPictureToolStripMenuItem.Text = "Catch picture";
             this.catchPictureToolStripMenuItem.Click += new System.EventHandler(this.catchPictureToolStripMenuItem_Click);
             // 
             // soundToolStripMenuItem
             // 
             this.soundToolStripMenuItem.Name = "soundToolStripMenuItem";
-            this.soundToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.soundToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.soundToolStripMenuItem.Text = "Sound";
             this.soundToolStripMenuItem.Click += new System.EventHandler(this.soundToolStripMenuItem_Click);
             // 
             // talkToolStripMenuItem
             // 
             this.talkToolStripMenuItem.Name = "talkToolStripMenuItem";
-            this.talkToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.talkToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.talkToolStripMenuItem.Text = "Talk";
             this.talkToolStripMenuItem.Click += new System.EventHandler(this.talkToolStripMenuItem_Click);
             // 
@@ -74,54 +73,43 @@
             // 
             this.closeToolStripMenuItem.AutoToolTip = true;
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
             // 
-            // checkBoxSaveImage
-            // 
-            this.checkBoxSaveImage.AutoSize = true;
-            this.checkBoxSaveImage.Location = new System.Drawing.Point(2, 1);
-            this.checkBoxSaveImage.Name = "checkBoxSaveImage";
-            this.checkBoxSaveImage.Size = new System.Drawing.Size(15, 14);
-            this.checkBoxSaveImage.TabIndex = 1;
-            this.checkBoxSaveImage.UseVisualStyleBackColor = true;
-            // 
-            // panel1
+            // panelVideo
             // 
             this.panelVideo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelVideo.Location = new System.Drawing.Point(-1, 17);
-            this.panelVideo.Name = "panel1";
-            this.panelVideo.Size = new System.Drawing.Size(193, 187);
+            this.panelVideo.Location = new System.Drawing.Point(-1, -1);
+            this.panelVideo.Name = "panelVideo";
+            this.panelVideo.Size = new System.Drawing.Size(193, 205);
             this.panelVideo.TabIndex = 2;
+            this.panelVideo.Click += new System.EventHandler(this.VideoForm_Click);
             // 
             // VideoForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ContextMenuStrip = this.contextMenuStrip1;
+            this.ContextMenuStrip = this.contextMenuStrip;
             this.Controls.Add(this.panelVideo);
-            this.Controls.Add(this.checkBoxSaveImage);
             this.Name = "VideoForm";
             this.Size = new System.Drawing.Size(191, 203);
             this.Click += new System.EventHandler(this.VideoForm_Click);
-            this.contextMenuStrip1.ResumeLayout(false);
+            this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem catchPictureToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem soundToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem talkToolStripMenuItem;
-        private System.Windows.Forms.CheckBox checkBoxSaveImage;
         private System.Windows.Forms.Panel panelVideo;
     }
 }
