@@ -25,7 +25,7 @@ namespace rtaNetworking.Streaming
         private static byte[] CRLF = new byte[] { 13, 10 };
         private static byte[] EmptyLine = new byte[] { 13, 10, 13, 10};
 
-        public MjpegWriter(Stream stream) : this(stream, "--boundary") {}
+        public MjpegWriter(Stream stream) : this(stream, "boundary") {}
 
         public MjpegWriter(Stream stream, string boundary)
         {
@@ -38,11 +38,14 @@ namespace rtaNetworking.Streaming
 
         public void WriteHeader()
         {
-            Write( 
-                    "HTTP/1.1 200 OK\r\n" +
+            Write(
+                    "HTTP/1.0 200 OK\r\n" +
+                    "Cache-Control: no-cache\r\n" +
+                    "Expires: Thu, 01 Dec 1994 16:00:00 GMT\r\n" +
+                    "Connection: close\r\n" +
                     "Content-Type: multipart/x-mixed-replace; boundary=" +
                     Boundary +
-                    "\r\n"
+                    "\r\n\r\n"
                  );
 
             Stream.Flush();
@@ -59,10 +62,11 @@ namespace rtaNetworking.Streaming
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine();
-            sb.AppendLine(this.Boundary);
-            sb.AppendLine("Content-Length: " + imageStream.Length.ToString());
-            sb.AppendLine("Content-Type: image/jpeg");            
-            sb.AppendLine(); 
+            sb.AppendLine("--" + this.Boundary);
+            sb.AppendLine("Content-Type: image/jpeg");
+            sb.AppendLine("Content-Length: " + imageStream.Length.ToString());                       
+            sb.AppendLine();
+            //sb.AppendLine();
 
             Write(sb.ToString());
             imageStream.WriteTo(Stream);

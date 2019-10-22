@@ -88,7 +88,7 @@ namespace DVR2Mjpeg
             int decode_result = 0;
             int len = FFmpeg.avcodec_decode_video(pCodecCtx_pt, yuvdata, ref decode_result, pFrame.pPacketBuffer, (int)pFrame.dwPacketSize);
             pCodecCtx = (FFmpeg.AVCodecContext)Marshal.PtrToStructure(pCodecCtx_pt, typeof(FFmpeg.AVCodecContext));
-
+            
             if (len > 0 && decodeFrameRuning == false)
             {
                 decodeFrameRuning = true;
@@ -101,7 +101,7 @@ namespace DVR2Mjpeg
                 Marshal.Copy(avpicture.data[0], data, 0, avpicture.linesize[0] * height);
                 Marshal.Copy(avpicture.data[1], data, (width + 32) * height, avpicture.linesize[1] * (height / 2));
                 Marshal.Copy(avpicture.data[2], data, (width + 32) * height * 5 / 4, avpicture.linesize[1] * (height / 2));
-
+                
                 Task.Factory.StartNew(DecodeFarme);          
             }
 
@@ -121,7 +121,7 @@ namespace DVR2Mjpeg
             for (int l = 0; l < height; l++) { Array.Copy(data, l * (width + 32), yuvframe, l * width, width); }
             for (int l = 0; l < (height / 2); l++) { Array.Copy(data, (width + 32) * height + l * (width + 32) / 2, yuvframe, imgSize + l * (width / 2), (width / 2)); }
             for (int l = 0; l < (height / 2); l++) { Array.Copy(data, (width + 32) * height * 5 / 4 + l * (width + 32) / 2, yuvframe, imgSize * 5 / 4 + l * (width / 2), (width / 2)); }
-
+            
             Bitmap bm = AVConverter.ConvertYUV2Bitmap(yuvframe, rgbframe, width, height);
 
             /////////////////////////////////////////////////////////////////// 
@@ -301,6 +301,8 @@ namespace DVR2Mjpeg
                 OnCloseSound();
             }
             m_lLogin = -1;
+
+            deleteImageOnServer();
         }
 
         public void drawOSD(int nPort, IntPtr hDc)
@@ -489,10 +491,10 @@ namespace DVR2Mjpeg
 
         void updateImageOnServer(Bitmap bm)
         {
-            var stream = new MemoryStream();
+            MemoryStream stream = new MemoryStream();
             bm.Save(stream, ici, ep);
             bm.Dispose();
-
+           
             DVR2Mjpeg parentForm = (DVR2Mjpeg)Parent;
             if (parentForm.HttpServer.imageData.ContainsKey((m_nIndex + 1).ToString()))
             {

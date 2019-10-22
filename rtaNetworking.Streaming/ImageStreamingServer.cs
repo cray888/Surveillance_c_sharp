@@ -150,6 +150,7 @@ namespace rtaNetworking.Streaming
                     client.Receive(bytes);
                     var str = Encoding.Default.GetString(bytes);
                     String path = GetLine(str, 1);
+                    String host = GetLine(str, 2);
 
                     if (path.IndexOf("GET /favicon.ico", StringComparison.CurrentCultureIgnoreCase) == 0)
                     {
@@ -159,7 +160,8 @@ namespace rtaNetworking.Streaming
                     {
                         using (Stream stream = new NetworkStream(client, true))
                         {
-                            string html = @"<html><head></head><body>Life on http://HOST:8080/?chanel=X<br /> Shots on http://HOST:8080/?chanel_shot=X </body></html>";
+                            string adress = host.ToLower().Replace("host: ", "");
+                            string html = @"<html><head></head><body>Life on http://" + adress + "/?chanel=X<br /> Shots on http://" + adress + "/?chanel_shot=X </body></html>";
                             StringBuilder sb = new StringBuilder();
                             sb.AppendLine("HTTP/1.1 200 OK");
                             sb.AppendLine("content-type: text/html");
@@ -230,7 +232,7 @@ namespace rtaNetworking.Streaming
                     }
                     else
                     {
-                        /*using (Stream stream = new NetworkStream(client, true))
+                        using (Stream stream = new NetworkStream(client, true))
                         {
                             StringBuilder sb = new StringBuilder();
                             sb.AppendLine("HTTP/1.1 301 Moved Permanently");
@@ -239,7 +241,7 @@ namespace rtaNetworking.Streaming
 
                             byte[] data_byte = Encoding.ASCII.GetBytes(sb.ToString());
                             stream.Write(data_byte, 0, data_byte.Length);
-                        }*/
+                        }
 
                         client.Close();
                     }
@@ -255,6 +257,8 @@ namespace rtaNetworking.Streaming
                     Debug.WriteLine(e.ToString());
                 }
             }
+
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ServerThread", "STOP THREAD");
 
             Stop();
         }
@@ -323,6 +327,8 @@ namespace rtaNetworking.Streaming
                 lock (ImagesSource)
                     ImagesSource.Remove(socket);
             }
+
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".ClientThread", "STOP THREAD");
         }
 
         private class ClientData
@@ -335,7 +341,7 @@ namespace rtaNetworking.Streaming
 
         public void Dispose()
         {
-            this.Stop();
+            Stop();
         }
 
         #endregion

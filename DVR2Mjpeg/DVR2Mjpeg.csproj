@@ -7,8 +7,8 @@
     <ProjectGuid>{28BCED0B-63CE-430C-BBB8-EFC0F621C586}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ClientDemo</RootNamespace>
-    <AssemblyName>ClientDemo</AssemblyName>
+    <RootNamespace>DVR2Mjpeg</RootNamespace>
+    <AssemblyName>DVR2Mjpeg</AssemblyName>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileUpgradeFlags>

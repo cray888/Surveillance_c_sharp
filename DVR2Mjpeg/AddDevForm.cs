@@ -55,7 +55,7 @@ namespace DVR2Mjpeg
 
                     foreach( Form form in  Application.OpenForms)
                     {
-                        if ( form.Name == "ClientDemo" )
+                        if ( form.Name == "DVR2Mjpeg")
                         {
                             clientForm = (DVR2Mjpeg)form;
                             break;

@@ -146,7 +146,7 @@
             this.Controls.Add(this.btnTransparent);
             this.Name = "DVR2Mjpeg";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "ClientDemo";
+            this.Text = "DVR2Mjpeg";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DVR2Mjpeg_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DVR2Mjpeg_FormClosed);
             this.Load += new System.EventHandler(this.DVR2Mjpeg_Load);

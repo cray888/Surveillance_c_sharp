@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVR2Mjpeg", "ClientDemo\DVR2Mjpeg.csproj", "{28BCED0B-63CE-430C-BBB8-EFC0F621C586}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DVR2Mjpeg", "DVR2Mjpeg\DVR2Mjpeg.csproj", "{28BCED0B-63CE-430C-BBB8-EFC0F621C586}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rtaNetworking.Streaming", "rtaNetworking.Streaming\rtaNetworking.Streaming.csproj", "{F961A5DF-7AE0-43F3-8CA3-01340D4A815F}"
 EndProject
