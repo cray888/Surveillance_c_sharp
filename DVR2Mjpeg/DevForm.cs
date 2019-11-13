@@ -254,6 +254,8 @@ namespace DVR2Mjpeg
         {
             if (e.Node.Name == "Channel")
             {
+                DVR2Mjpeg DVR2Mjpeg = (DVR2Mjpeg)Parent;
+
                 TreeNode nodeDev = e.Node.Parent;
                 DEV_INFO devinfo = (DEV_INFO)nodeDev.Tag;
                 CHANNEL_INFO chanInfo = (CHANNEL_INFO)e.Node.Tag;
@@ -263,6 +265,7 @@ namespace DVR2Mjpeg
                     CHANNEL_INFO chInfo = (CHANNEL_INFO)e.Node.Tag;
                     chInfo.nWndIndex = ((DVR2Mjpeg)this.Parent).m_nCurIndex;
                     e.Node.Tag = chInfo;
+                    DVR2Mjpeg.isConnected = true;
                 }
             }
         }

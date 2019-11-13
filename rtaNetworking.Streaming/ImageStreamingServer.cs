@@ -178,47 +178,85 @@ namespace rtaNetworking.Streaming
                     }
                     else if (path.IndexOf("GET /?chanel=", StringComparison.CurrentCultureIgnoreCase) == 0)
                     {
-                        string param = "?chanel=";
-                        string chanel = path.Substring(path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase) + param.Length, path.IndexOf(" ", path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase)) - (path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase) + param.Length));
+                        string chanel = "0";
+                        string streamid = "1";
+
+                        string get = path.Split(new char[] { ' ' })[1];
+                        get = get.Substring(2);
+                        string[] paramArr = get.Split(new char[] { '&' });
+
+                        foreach (string param in paramArr)
+                        {
+                            string[] paramsplit = param.Split(new char[] { '=' });
+                            if (paramsplit[0] == "chanel") chanel = paramsplit[1];
+                            if (paramsplit[0] == "stream") streamid = paramsplit[1];
+                        }
+
+                        //string param = "?chanel=";
+                        //string chanel = path.Substring(path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase) + param.Length, path.IndexOf(" ", path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase)) - (path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase) + param.Length));
 
                         lock (ImagesSource)
                             ImagesSource.Add(client, Dvr.Snapshots(chanel, imageData));
                         ClientData clientdata = new ClientData();
                         clientdata.client = client;
                         clientdata.chanel = Int32.Parse(chanel);
+                        clientdata.stream = Int32.Parse(streamid);
                         ThreadPool.QueueUserWorkItem(new WaitCallback(ClientThread), clientdata);
 
                     }
                     else if (path.IndexOf("GET /?chanel_shot=", StringComparison.CurrentCultureIgnoreCase) == 0)
                     {
+                        Stream stream = new NetworkStream(client, true);
+                        string chanel = "0";
+                        string streamid = "0";
+                        bool chanelopen = false;
                         try
                         {
-                            using (Stream stream = new NetworkStream(client, true))
+                            string get = path.Split(new char[] {' '})[1];
+                            get = get.Substring(2);
+                            string[] paramArr = get.Split(new char[] { '&' });
+                            
+                            foreach (string param in paramArr)
                             {
-                                string param = "?chanel_shot=";
-                                string chanel = path.Substring(path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase) + param.Length, path.IndexOf(" ", path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase)) - (path.IndexOf(param, StringComparison.CurrentCultureIgnoreCase) + param.Length));
+                                string[] paramsplit = param.Split(new char[] { '=' });
+                                if (paramsplit[0] == "chanel_shot") chanel = paramsplit[1];
+                                if (paramsplit[0] == "stream") streamid = paramsplit[1];
+                            }
 
-                                if (callback != null) callback.OnClientRequestShot(Int32.Parse(chanel));
-
-                                string strLink = String.Format(@"Z:\Pictures\jpeg\{0}.jpg", chanel);
-
-                                var data = File.ReadAllBytes(strLink);
-                                var ms = new MemoryStream(data);
+                            if (callback != null)
+                            {
+                                callback.OnClientConnect(Int32.Parse(chanel), Int32.Parse(streamid));
+                                chanelopen = true;
+                            }
+                            int counter = 0;
+                            while (imageData.ContainsKey(chanel) != true && counter < 1000)
+                            {
+                                counter++;
+                                Thread.Sleep(10);
+                            }
+                            if (counter == 1000) client.Close();
+                            else
+                            {
+                                Image image = Image.FromStream(new MemoryStream(imageData[chanel]));
+                                MemoryStream ms = new MemoryStream();
+                                image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
 
                                 StringBuilder sb = new StringBuilder();
                                 sb.AppendLine("HTTP/1.1 200 OK");
-                                sb.AppendLine("Server: cray_server");
                                 sb.AppendLine("Connection: keep-alive");
                                 sb.AppendLine("Content-Type: image/jpeg");
                                 sb.AppendLine("Content-Length: " + ms.Length.ToString());
                                 sb.AppendLine();
-
                                 byte[] data_byte = Encoding.ASCII.GetBytes(sb.ToString());
-                                stream.Write(data_byte, 0, data_byte.Length);
 
+                                stream.Write(data_byte, 0, data_byte.Length);
                                 ms.WriteTo(stream);
 
                                 stream.Flush();
+                            }
+                            if (callback != null && chanelopen)
+                            {
+                                callback.OnClientDisconnect(Int32.Parse(chanel));
                             }
                         }
                         catch (Exception e)
@@ -227,8 +265,10 @@ namespace rtaNetworking.Streaming
                         }
                         finally
                         {
+                            Thread.Sleep(100);
                             client.Close();
                         }
+
                     }
                     else
                     {
@@ -288,7 +328,7 @@ namespace rtaNetworking.Streaming
 
             try
             {
-                if (callback != null) callback.OnClientConnect(clientdata.chanel);
+                if (callback != null) callback.OnClientConnect(clientdata.chanel, clientdata.stream);
 
                 using (MjpegWriter wr = new MjpegWriter(new NetworkStream(socket, true)))
                 {
@@ -335,6 +375,7 @@ namespace rtaNetworking.Streaming
         {
             public Socket client;
             public int chanel;
+            public int stream;
         }
 
         #region IDisposable Members

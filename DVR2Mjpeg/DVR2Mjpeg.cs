@@ -16,6 +16,7 @@ namespace DVR2Mjpeg
         //Service variable
         private String TAG = "DVR2Mjpeg";
         public static int TOTALWND = 32;
+        //0 - best, 1 - low 
         private int VIDEOSTREAM = 1;
         private int SHOTSTREAM = 0;
 
@@ -27,6 +28,7 @@ namespace DVR2Mjpeg
         public Boolean isConnected;
         public int chanelOpened;
 
+        //forms
         public PTZForm m_formPTZ;
         public DevConfigForm m_formCfg;
         public VideoForm[] m_videoform = new VideoForm[TOTALWND];
@@ -126,9 +128,9 @@ namespace DVR2Mjpeg
 
         public DVR2Mjpeg(bool noInit) { }
 
-        private void OpenChanel(int indexWind, int chanelID, int stream, bool savePicture)
+        private void OpenChanel(int indexWind, int chanelID, int stream)
         {
-            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".OpenChanel(" + indexWind.ToString() + "," + chanelID + "," + savePicture.ToString() + ")", "DVR INFO");
+            Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".OpenChanel(" + indexWind.ToString() + "," + chanelID + ")", "DVR INFO");
 
             TreeNode nodeDev = devForm.DevTree.Nodes[0];
             DEV_INFO devinfo = (DEV_INFO)nodeDev.Tag;
@@ -739,7 +741,7 @@ namespace DVR2Mjpeg
         //////////////////////////////////////////////
         //Webserver callback 
         //////////////////////////////////////////////
-        public void OnClientConnect(int chanel)
+        public void OnClientConnect(int chanel, int stram = 1)
         {
             chanel--;
 
@@ -748,9 +750,9 @@ namespace DVR2Mjpeg
             if (clientConnectedPerChanel[chanel] == 1)
             {
                 if (InvokeRequired)
-                    BeginInvoke((MethodInvoker)(() => OpenChanel(chanel, chanel, VIDEOSTREAM, false)));
+                    BeginInvoke((MethodInvoker)(() => OpenChanel(chanel, chanel, stram)));
                 else
-                    OpenChanel(chanel, chanel, VIDEOSTREAM, false);
+                    OpenChanel(chanel, chanel, VIDEOSTREAM);
             }
         }
 
@@ -769,7 +771,7 @@ namespace DVR2Mjpeg
             }
         }
 
-        public void OnClientRequestShot(int chanel)
+        public void OnClientRequestShot(int chanel, int stram = 0)
         {
             chanel--;
 
@@ -777,11 +779,11 @@ namespace DVR2Mjpeg
             if (clientConnectedPerChanel[chanel] == 1)
             {
                 if (InvokeRequired)
-                    BeginInvoke((MethodInvoker)(() => OpenChanel(chanel, chanel, SHOTSTREAM, true)));
-                else OpenChanel(chanel, chanel, SHOTSTREAM, true);
+                    BeginInvoke((MethodInvoker)(() => OpenChanel(chanel, chanel, stram)));
+                else OpenChanel(chanel, chanel, SHOTSTREAM);
             }
 
-            Thread.Sleep(1000);
+            //Thread.Sleep(1000);
 
             clientConnectedPerChanel[chanel]--;
             if (clientConnectedPerChanel[chanel] == 0)

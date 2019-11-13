@@ -86,9 +86,16 @@ namespace DVR2Mjpeg
             IntPtr yuvdata = Marshal.AllocHGlobal(200);
 
             int decode_result = 0;
-            int len = FFmpeg.avcodec_decode_video(pCodecCtx_pt, yuvdata, ref decode_result, pFrame.pPacketBuffer, (int)pFrame.dwPacketSize);
-            pCodecCtx = (FFmpeg.AVCodecContext)Marshal.PtrToStructure(pCodecCtx_pt, typeof(FFmpeg.AVCodecContext));
-            
+            int len = 0;
+            try
+            {
+                len = FFmpeg.avcodec_decode_video(pCodecCtx_pt, yuvdata, ref decode_result, pFrame.pPacketBuffer, (int)pFrame.dwPacketSize);
+                pCodecCtx = (FFmpeg.AVCodecContext)Marshal.PtrToStructure(pCodecCtx_pt, typeof(FFmpeg.AVCodecContext));
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(DateTime.Now.ToString("HH:mm:ss - ") + TAG + ".DataCallBack_V2.Exception(" + e.Message + ")", "WEB ERROR");
+            }
             if (len > 0 && decodeFrameRuning == false)
             {
                 decodeFrameRuning = true;
@@ -392,7 +399,7 @@ namespace DVR2Mjpeg
 
         private void catchPictureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            return;
+            //return;
             if (m_nIndex > -1 && m_iPlayhandle > 0 && m_bSaveImageStart == false)
             {
                 String strPath;
